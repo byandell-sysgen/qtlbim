@@ -397,7 +397,7 @@ qb.numqtl <- function(qbObject, ...)
   n.iter <- qb.niter(qbObject)
 
   ## Posterior number of QTL.
-  posterior <- table(iterdiag$nqtl)
+  posterior <- c(table(iterdiag$nqtl))
   rnames <- names(posterior)
   posterior <- as.numeric(posterior) / n.iter
   
@@ -426,8 +426,8 @@ qb.pattern <- function(qbObject, cutoff = 1, nmax = 15, epistasis = TRUE, ...)
   pairloci <- qb.get(qbObject, "pairloci", ...)
   pattern <- qb.makepattern(qbObject, epistasis, iterdiag = iterdiag,
                             mainloci = mainloci, pairloci = pairloci)
-                           
-  posterior <- rev(sort(table(pattern)))
+  
+  posterior <- c(rev(sort(table(pattern))))
   posterior <- posterior / sum(posterior)
   tmp <- posterior >= cutoff / 100
   if(sum(tmp))
@@ -561,7 +561,8 @@ qb.pattern <- function(qbObject, cutoff = 1, nmax = 15, epistasis = TRUE, ...)
   nqtl <- sapply(strsplit(tmp, ","),length)
   names(nqtl) <- tmp
   data.frame(nqtl = nqtl,
-             posterior = posterior, prior = prior, bf = bf,
+             posterior = posterior, prior = prior,
+             bf = bf,
              bfse = sqrt((1 - posterior) / (posterior * n.iter)) * bf)
 }
 ##############################################################################

@@ -1175,7 +1175,7 @@ plot.qb.scanone <- function(x, chr = NULL,
       scans <- c(scans, scan.epis)
 
     ## Set limits to be the same for all scans.
-    ylims <- range( c(x[chr.sub, scans]), na.rm = TRUE)
+    ylims <- range(c(as.data.frame(x)[chr.sub, scans]), na.rm = TRUE)
 
     ret <- NULL
     if(is.sum) {
@@ -1209,7 +1209,7 @@ plot.qb.scanone <- function(x, chr = NULL,
     ret$color <- factor(ret$color)
   }
   else {
-    ylims <- range( c(x[chr.sub, scan]), na.rm = TRUE)
+    ylims <- range(c(as.data.frame(x)[chr.sub, scan]), na.rm = TRUE)
 
     ## Work on pretty title.
     if(length(scan) < 4)
@@ -1248,7 +1248,7 @@ plot.qb.to.scanone <- function(x,
   }
 
   ## Process the selected scan terms.
-  ylims <- range( c(x[, scan]), na.rm = TRUE)
+  ylims <- range(c(as.data.frame(x)[, scan]), na.rm = TRUE)
 
   ## Figure out phenotype name indirectly.
   pheno.name <- attr(x, "pheno.name")

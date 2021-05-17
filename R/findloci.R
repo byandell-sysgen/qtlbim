@@ -171,7 +171,7 @@ plot.qb.multloci <- function(x, amount = .5, cex = attr(x, "cex"),
   if(is.two) {
     table.niter <- table(x$mainloci$niter)
     if(!is.null(x$pairloci))
-      mainloci.nqtl <- table.niter[as.character(x$pairloci$niter)]
+      mainloci.nqtl <- c(table.niter[as.character(x$pairloci$niter)])
   }
 
   locus.more <- data.frame(locus = x$mainloci$locus)
@@ -344,7 +344,8 @@ plot.qb.multloci <- function(x, amount = .5, cex = attr(x, "cex"),
         ## Scatter plot of pairs: upper triangle = epistatic pairs.
         locus.more <- rbind(locus.more,
                             cbind(x$pairloci[, c("locus1", "locus2")],
-                                  nqtl = mainloci.nqtl, point = 0))
+                                  nqtl = mainloci.nqtl,
+                                  point = 0))
         rm(mainloci.nqtl)
       }
       

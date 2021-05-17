@@ -239,7 +239,7 @@ qb.pairs <- function(qbObject, cutoff = 1, nmax = 15, ...)
   geno.names <- qb.geno.names(qbObject)
   inter <- paste(geno.names[pairloci[, "chrom1"]],
                  geno.names[pairloci[, "chrom2"]], sep = ":")
-  posterior <- rev(sort(table(inter))) / niter
+  posterior <- rev(sort(c(table(inter)))) / niter
   posterior <- posterior[ posterior > cutoff / 100 ]
   posterior[posterior > 1] <- 1
   if(!length(posterior))

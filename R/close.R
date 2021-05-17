@@ -357,7 +357,7 @@ summary.qb.close <- function(object,
 
   ## Find patterns above cutoff.  
   tmp2 <- paste(object$n.qtl, object$pattern, sep = "@")
-  pct <- table(tmp2) * 100 / nrow(object)
+  pct <- c(table(tmp2)) * 100 / nrow(object)
   maxpct <- max(pct)
 
   ## Make sure cutoff allows for at least one entry.
@@ -409,7 +409,7 @@ plot.qb.close <- function(x, category = c("pattern", "nqtl"),
            ## At very least, only consider more frequent QTL.
            ## Find patterns above cutoff.  
            tmp2 <- paste(x$n.qtl, x$pattern, sep = "@")
-           pct <- table(tmp2) * 100 / nrow(x)
+           pct <- c(table(tmp2)) * 100 / nrow(x)
            maxpct <- max(pct)
            pct <- rev(sort(pct[pct > cutoff]))
            if(!length(pct))
@@ -444,7 +444,7 @@ qb.patterniter <- function(qbObject,
     pattern <- qb.nqtl(qbObject, mainloci = mainloci, ...)
 
   ## Restrict to most common patterns. Reset cutoff if too large.
-  pct <- table(pattern) * 100 / length(pattern)
+  pct <- c(table(pattern)) * 100 / length(pattern)
   if(max(pct) < cutoff)
     cutoff <- max(pct)
   pct <- rev(sort(pct[pct >= cutoff]))
@@ -456,7 +456,7 @@ qb.patterniter <- function(qbObject,
   ## Number of QTL per iteration.
   nqtl <- rep(0, length(pattern))
   names(nqtl) <- names(pattern)
-  tmp <- table(mainloci$niter)
+  tmp <- c(table(mainloci$niter))
   nqtl[names(tmp)] <- tmp
 
   list(pattern = pattern, nqtl = nqtl, pct = pct)
@@ -547,7 +547,7 @@ qb.patternave <- function(qbObject, epistasis = TRUE, pattern, nqtl, pct,
     tmp <- rep(0, length(targets))
     tmp2 <- targets == "NULL"
     if(any(!tmp2))
-      tmp[!tmp2] <- table(sumpat[, "niter"])
+      tmp[!tmp2] <- c(table(sumpat[, "niter"]))
     pattern.sumpat <- rep(targets, tmp)
    
     if(include == "nested") {
@@ -573,7 +573,7 @@ qb.patternave <- function(qbObject, epistasis = TRUE, pattern, nqtl, pct,
       
       tmp <- tmpfn(chrs, iters$chrom, i, pattern.nqtl, patterns, matches)
       itersi <- iters[tmp, ]
-      splitsi <- factor(iters$chrom[tmp], chrs)
+      splitsi <- factor(iters$chrom[tmp], unique(chrs))
 
       for(j in c("locus", "variance")) {
         tmp2 <- c(tapply(itersi[, j], splitsi, myave, na.rm = TRUE))
@@ -719,7 +719,7 @@ qb.patterndist <- function(qbBestObject,
     n.qtl <- sum(apply(matrix(unlist(tapply(sumpat[, "chrom"],
                                             sumpat[, "niter"],
                                             function(x, allchr) {
-                                              tmp <- table(x)
+                                              tmp <- c(table(x))
                                               allchr[names(tmp)] <- c(tmp)
                                               allchr
                                             },
@@ -877,7 +877,8 @@ summary.qb.BestPattern <- function(object, method = "complete",
   out <- list(max.qtl = object$max.qtl)
   hc <- hclust(object$dist, method = method)
 
-  out$summary <- data.frame(terms = object$nqtl, percent = object$pct,
+  out$summary <- data.frame(terms = object$nqtl, 
+                            percent = object$pct,
                             score = object$score,
                             cluster = cutree(hc, k = cluster))[hc$order, ]
   out$summary <- out$summary[order(-out$summary$score, -out$summary$percent), ]

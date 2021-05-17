@@ -9,6 +9,7 @@
 \usepackage{Sweave}
 
 \begin{document}
+\SweaveOpts{concordance=TRUE}
 
 <<echo=FALSE,label=Initialization>>=
 ## Initialization if not called from qb.sweave.
