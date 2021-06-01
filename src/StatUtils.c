@@ -12,7 +12,8 @@
 
 double RANDOM()
 {
-	double U=rand()/(RAND_MAX+1.0);
+  double unif_rand();
+  double U=unif_rand()/(RAND_MAX+1.0);
 	if(U>=1.0) U=1.0-(1e-10); if(U<=0.0) U=1e-10;
 	return(U);
 }
@@ -66,8 +67,9 @@ double TrunNormal(double T1,double T2,double B,double V)
 	double u,p1,p2,p,alpha=0,y=0,yy=0;
 	double c0=2.515517,c1=0.802853,c2=0.010328,d1=1.432788,d2=0.189269,d3=0.001308;
 //	double T1=CUTPOINT[WW],T2=CUTPOINT[WW+1];
+  double unif_rand();
 
-	u=rand()/(RAND_MAX+1.0);
+	u=unif_rand()/(RAND_MAX+1.0);
 
 	p1=NormalFunction((T1-B)/sqrt(V));
 	p2=NormalFunction((T2-B)/sqrt(V));

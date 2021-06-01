@@ -33,7 +33,7 @@ cross <- qb.sim.cross(len = rep(60,3), n.mar = 7, eq.spacing =FALSE,
 summary(cross$qtl)
 cross <- qb.genoprob(cross, step=2)
 qbExample <- qb.mcmc(cross, pheno.col = 3, rancov = 2, fixcov = 1,
-                     chr.nqtl = rep(3,nchr(cross)), intcov = 1, seed = 1216,
+                     chr.nqtl = rep(3, qtl::nchr(cross)), intcov = 1, seed = 1216,
                      interval = rep(10,3), n.iter = 1000, n.thin = 20)
 
 save("qbExample", file = "qbExample.RData")

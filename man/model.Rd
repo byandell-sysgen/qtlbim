@@ -71,7 +71,7 @@ if(!exists("cross"))
   example(qb.genoprob)
 
 }
-qbModel <- qb.model(cross, chr.nqtl = rep(3,nchr(cross)), intcov = 1,
+qbModel <- qb.model(cross, chr.nqtl = rep(3, qtl::nchr(cross)), intcov = 1,
   interval = rep(10,3))  
 }
 \keyword{models}

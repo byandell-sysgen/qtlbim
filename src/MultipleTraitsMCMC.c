@@ -2255,10 +2255,9 @@ void multipleTraitsMCMC()
 
 int I,J,L,K,K1,K2,L0,L1,L2,PH;     
 double **ybar,**sigma;
-  
-if(SEED==0)	srand(time(NULL));
-else srand(SEED);
-rand();    
+double unif_rand();
+
+unif_rand();
 
 //*************************************************************************
 // calculating phenotypic mean and variance, and assign initial values
