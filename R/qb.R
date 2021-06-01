@@ -147,7 +147,7 @@ qb.prior <- function(qbObject, range, mean = qb.get(qbObject, "mean.nqtl"))
   ## Compute values of prior distribution over the range.
   pr <- switch(prior,
                geometric = (1 / mean) ^ range / (1 - (1 / mean)),
-               poisson   = dpois(range, mean),
+               poisson   = stats::dpois(range, mean),
                uniform   = rep(1 / (1 + mean), length(range)))
 
   if(is.null(pr))
@@ -168,7 +168,7 @@ qb.prior <- function(qbObject, range, mean = qb.get(qbObject, "mean.nqtl"))
 ##       
 ##
 
-plot.qb <- function(x, ask = dev.interactive(), verbose = TRUE, ...)
+plot.qb <- function(x, ask = qrDevices::dev.interactive(), verbose = TRUE, ...)
 {
   nqtl <- qb.nqtl(x, ...)
   if(max(nqtl) == 0)
@@ -226,16 +226,16 @@ qb.smooth <- function(x, y)
     ##    smo <- list(x = sort(ux),
     ##                y = rep(mean(y), length(ux)))
     ##    smo$sd <- rep(mad(y), length(smo$x))
-    lmy <- lm(y ~ x)
+    lmy <- stats::lm(y ~ x)
     smo <- list(x = sort(ux),
-                y = predict(lmy, data.frame(x = sort(ux))),
-                sd = rep(sqrt(sum(resid(lmy) ^ 2) / lmy$df.resid),
+                y = stats::predict(lmy, data.frame(x = sort(ux))),
+                sd = rep(sqrt(sum(stats::resid(lmy) ^ 2) / lmy$df.resid),
                   length(ux)))
   }
   else {
-    smo <- smooth.spline(x, y)
+    smo <- stats::smooth.spline(x, y)
     smo$sd <- sqrt(pmax(0,
-                         smooth.spline(x, (y - predict(smo, x)$y) ^ 2)$y))
+                         stats::smooth.spline(x, (y - stats::predict(smo, x)$y) ^ 2)$y))
   }
   smo  
 }
@@ -290,7 +290,7 @@ qb.loci <- function(qbObject, loci = c("main", "epistasis", "GxE"),
            })
   }
   class(out.list) <- c("qb.loci", "list")
-  attr(out.list, "map") <- pull.map(qb.cross(qbObject, genoprob = FALSE))
+  attr(out.list, "map") <- qtl::pull.map(qb.cross(qbObject, genoprob = FALSE))
 
   ## get mean spacing between grid points
   grid <- diff(pull.grid(qbObject)$pos)
@@ -330,18 +330,18 @@ plot.qb.loci <- function(x, loci = names(x), labels = FALSE, amount = .35,
   ochrom[uchrom] <- seq(nchrom)
   plot(c(1,nchrom) + c(-.5,.5), range(0,rlocus),
        type = "n", xaxt = "n", xlab = "", ylab = "", ...)
-  axis(1, seq(nchrom), nmap[uchrom])
-  mtext("chromosome", 1, 2)
-  mtext(paste(loci, col[loci], sep = "=", collapse = ", "), 1, 3)
-  mtext("MCMC sampled loci", 2, 2)
-  cxy <- par("cxy")[2] / 4
+  graphics::axis(1, seq(nchrom), nmap[uchrom])
+  graphics::mtext("chromosome", 1, 2)
+  graphics::mtext(paste(loci, col[loci], sep = "=", collapse = ", "), 1, 3)
+  graphics::mtext("MCMC sampled loci", 2, 2)
+  cxy <- graphics::par("cxy")[2] / 4
 
   ## Add lines for markers (and names if markers = TRUE).
   for(i in seq(nchrom)) {
     ii <- uchrom[i]
     tmp <- map[[nmap[ii]]]
     for(j in tmp)
-      lines(i + c(-.475,.475), rep(j, 2), col = col["marker"],
+      graphics::lines(i + c(-.475,.475), rep(j, 2), col = col["marker"],
             lwd = 2)
   }
 
@@ -349,7 +349,7 @@ plot.qb.loci <- function(x, loci = names(x), labels = FALSE, amount = .35,
   ## Side by side columns for loci at each chr.
   nloci <- length(loci)
   for(i in seq(nloci)) {
-    points(jitter(ochrom[x[[loci[i]]]$chrom] +
+    graphics::points(jitter(ochrom[x[[loci[i]]]$chrom] +
                   (2 * i - nloci - 1) * amount[1] / nloci,
                   , amount[1] / nloci),
            jitter(x[[loci[i]]]$locus, , amount[2] * attr(x, "grid")),
@@ -364,7 +364,7 @@ plot.qb.loci <- function(x, loci = names(x), labels = FALSE, amount = .35,
     for(i in seq(nchrom)) {
       ii <- uchrom[i]
       tmp <- map[[nmap[ii]]]
-      text(rep(i-.5, length(tmp)), cxy + tmp, names(tmp),
+      graphics::text(rep(i-.5, length(tmp)), cxy + tmp, names(tmp),
            adj = 0, cex = 0.5, col = col["marker"])
     }
   invisible()
@@ -379,7 +379,7 @@ summary.qb.loci <- function(object, digit = 1, ...)
            tmp <- round(t(sapply(tapply(object$locus, nmap[object$chrom],
                                         function(x) {
                                           c(n.qtl = length(x) / n.iter,
-                                            quantile(x, c(.25,.5,.75)))
+                                            stats::quantile(x, c(.25,.5,.75)))
                                         }),
                                  c)),
                         digit)
@@ -445,7 +445,7 @@ qb.pattern <- function(qbObject, cutoff = 1, nmax = 15, epistasis = TRUE, ...)
   rng <- max(iterdiag$nqtl)
   pr <- qb.prior(qbObject, 0:rng)
   bf <- posterior
-  map <- pull.map(qb.cross(qbObject, genoprob = FALSE))
+  map <- qtl::pull.map(qb.cross(qbObject, genoprob = FALSE))
   chrlen <- unlist(lapply(map, max))
   nchrom <- length(chrlen)
   chrlen <- chrlen / sum(chrlen)
@@ -605,8 +605,8 @@ print.qb.BayesFactor <- function(x, ...) print(summary(x, ...))
 ##############################################################################
 plot.qb.BayesFactor <- function(x, ...)
 {
-  tmpar <- par(mfrow = c(length(x), 2), mar = c(3.1,3.1,2.1,0.1))
-  on.exit(par(tmpar))
+  tmpar <- graphics::par(mfrow = c(length(x), 2), mar = c(3.1,3.1,2.1,0.1))
+  on.exit(graphics::par(tmpar))
 
   if(!is.null(x$nqtl))
     plot.qb.pattern(x$nqtl, row.names(x$nqtl),
@@ -659,8 +659,8 @@ summary.qb.diag <- function(object, digits = 5, ...)
   nc <- ncol(object)
   apply(object[, -nc], 2,
         function(x, y) {
-          signif(c(median = median(x, na.rm = TRUE),
-                  unlist(tapply(x, y, median, na.rm = TRUE))), 5)
+          signif(c(median = stats::median(x, na.rm = TRUE),
+                  unlist(tapply(x, y, stats::median, na.rm = TRUE))), 5)
           },
         object[, nc])
 }
@@ -672,29 +672,29 @@ plot.qb.diag <- function(x, ...)
   nx <- ncol(x)
   nhist <- nx - 1
 
-  tmpar <- par(mfrow = c(nhist, 2), mar=c(2.1,2.1,0.1,0.1), oma = c(0,0,3,0))
-  on.exit(par(tmpar))
+  tmpar <- graphics::par(mfrow = c(nhist, 2), mar=c(2.1,2.1,0.1,0.1), oma = c(0,0,3,0))
+  on.exit(graphics::par(tmpar))
 
   for(i in dimnames(x)[[2]][-nx]) {
     diag <- x[, i]
     diag <- diag[!is.na(diag)]
     
-    plot(density(diag), main = "", xlab = "", ylab = "", yaxt = "n", ...)
-    mtext(i, 2, 0.5)
+    plot(stats::density(diag), main = "", xlab = "", ylab = "", yaxt = "n", ...)
+    graphics::mtext(i, 2, 0.5)
     ## hand-made boxplot on its side
-    b <- boxplot(diag, plot = FALSE)
-    tmp <- par("usr")[4] / 8
+    b <- graphics::boxplot(diag, plot = FALSE)
+    tmp <- graphics::par("usr")[4] / 8
     up <- tmp * 1.5
-    polygon(b$stats[c(2,4,4,2)], up+c(0,0,tmp,tmp))
-    lines(rep(b$stats[3],2), up+c(0,tmp))
-    lines(b$stats[1:2], up+rep(tmp/2,2), lty = 2)
-    lines(b$stats[4:5], up+rep(tmp/2,2), lty = 2)
-    lines(rep(b$stats[1],2), up+tmp*c(1,3)/4)
-    lines(rep(b$stats[5],2), up+tmp*c(1,3)/4)
+    graphics::polygon(b$stats[c(2,4,4,2)], up+c(0,0,tmp,tmp))
+    graphics::lines(rep(b$stats[3],2), up+c(0,tmp))
+    graphics::lines(b$stats[1:2], up+rep(tmp/2,2), lty = 2)
+    graphics::lines(b$stats[4:5], up+rep(tmp/2,2), lty = 2)
+    graphics::lines(rep(b$stats[1],2), up+tmp*c(1,3)/4)
+    graphics::lines(rep(b$stats[5],2), up+tmp*c(1,3)/4)
     
     ## conditional boxplots
     tmp <- split(diag, x[!is.na(x[, i]), nx])
-    boxplot(tmp)
+    graphics::boxplot(tmp)
   }
 }
 ##############################################################################
@@ -722,10 +722,10 @@ qb.demo <- function()
     if(length(selection)) {
       if(match(selection, stops, nomatch = 0)) break
       if(match(selection, helps, nomatch = 0))
-        demo(package = "qtlbim")
+        utils::demo(package = "qtlbim")
       else {
         if(nchar(selection))
-          demo(paste("qb", selection, "tour", sep = "."), "qtlbim",
+          utils::demo(paste("qb", selection, "tour", sep = "."), "qtlbim",
                character.only = TRUE)
       }
     }

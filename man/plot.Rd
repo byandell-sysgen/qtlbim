@@ -8,7 +8,7 @@
   providing graphical model assessment tools.
 }
 \usage{
-\method{plot}{qb}(x, ask = dev.interactive(), verbose = TRUE, \dots)
+\method{plot}{qb}(x, ask = qrDevices::dev.interactive(), verbose = TRUE, \dots)
 \method{print}{qb}(x, \dots)
 \method{summary}{qb}(object, cutoff = 1, \dots)
 }

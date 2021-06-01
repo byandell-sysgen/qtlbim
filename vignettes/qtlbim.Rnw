@@ -791,8 +791,8 @@ hyper.arch
 <<echo=TRUE,label=InitializeFitQTL>>=
 hyper.sub <- subset(hyper, chr = hyper.arch$qtl$chr)
 n.draws <- 8
-hyper.sub <- sim.geno(hyper.sub, n.draws=n.draws, step=2, error=0.01)
-qtl <- makeqtl(hyper.sub, as.character(hyper.arch$qtl$chr), hyper.arch$qtl$pos)
+hyper.sub <- qtl::sim.geno(hyper.sub, n.draws=n.draws, step=2, error=0.01)
+qtl <- qtl::makeqtl(hyper.sub, as.character(hyper.arch$qtl$chr), hyper.arch$qtl$pos)
 @
 
 Now we run stepwise backward elimination, preserving hierarchy. The

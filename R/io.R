@@ -29,7 +29,7 @@ qb.reorder <- function(qbObject, warn = FALSE,
   region <- qb.get(qbObject, "region", warn = warn)
   if(is.null(region)) {
     ## Subset regions for chromosomes.
-    map <- pull.map(cross)
+    map <- qtl::pull.map(cross)
     region <- as.data.frame(lapply(map, range))
     region <- data.frame(chr = seq(ncol(region)),
                          start = unlist(region[1,]),
@@ -206,7 +206,7 @@ qb.legacy <- function(qbObject, remove = FALSE, ...)
         new$args[[i]] <- defaults[[i]]
     
     ## Attach cleaned cross object.
-    new$cross.object <- clean(cross)
+    new$cross.object <- qtl::clean(cross)
     
     ## External MCMC files now internal.
     ## Organized as list of lists for multiple trait extension.
@@ -245,7 +245,7 @@ qb.legacy <- function(qbObject, remove = FALSE, ...)
 qb.genoprob.defaults <- function(cross)
 {
   ## Assign calc.genoprob attributes to args list.
-  defaults <- formals(calc.genoprob)
+  defaults <- formals(qtl::calc.genoprob)
   defaults$cross <- NULL
   defaults$step <- 2
   defaults$stepwidth <- "variable"
@@ -355,7 +355,7 @@ qb.get.legacy <- function(qbObject, element,
     tmp <- scan(filename, n = 1, quiet = TRUE)
     x <- NULL
     if (length(tmp))
-      x <- as.data.frame(read.table(filename))
+      x <- as.data.frame(utils::read.table(filename))
     if (is.null(x)) 
       return(NULL)
     
@@ -585,7 +585,7 @@ qb.recover <- function(cross, traitName,
 
   ## Now get the defaults (or supplied values via ...) for data and model.
   qbObject <- c(qbObject,
-    qb.data(cross, pheno.col = find.pheno(cross, traitName), ...),
+    qb.data(cross, pheno.col = qtl::find.pheno(cross, traitName), ...),
     qb.model(cross, ...))
 
   ## Object is of class "qb".
@@ -689,7 +689,7 @@ subset.qb <- function(x, nqtl = 1, pattern = NULL, exact = FALSE, chr,
   
   ## Subset of regions in chromosomes.
   sub$region <- qb.get(x, "region")
-  cross.map <- pull.map(cross)
+  cross.map <- qtl::pull.map(cross)
   if(is.null(sub$region)) {
     tmp <- names(cross.map)
     sub$region <- data.frame(chr = ordered(tmp, tmp),
@@ -848,7 +848,7 @@ qb.save <- function(cross, qbObject, dir = ".", Name= substring(qbName, 3))
   qbObject$output.dir <- my.mcmc
   assign(qbName, qbObject, envir = parent.frame())
   ## Clean cross to make it smaller (qb.load will rebuild).
-  cross <- clean(cross)
+  cross <- qtl::clean(cross)
   
   ## Save in right place.
   out <- exists(qbName) & exists(qbCross)
@@ -1253,7 +1253,7 @@ pull.loci <- function(cross,
   ## Need to check step, off.end, stepwidth.
 
   tmpfn <- function(x, step, off.end, stepwidth) {
-    create.map(x$map, step, off.end, stepwidth)
+    qtl::create.map(x$map, step, off.end, stepwidth)
   }
   loci <- lapply(cross$geno, tmpfn, step, off.end, stepwidth)
   if(!is.null(region)) {
@@ -1288,7 +1288,7 @@ pull.grid <- function (qbObject, offset = FALSE, spacing = FALSE,
   len <- sapply(grid.map, length)
 
   ## Pull map.
-  cross.map <- pull.map(cross)
+  cross.map <- qtl::pull.map(cross)
 
   ## Construct map position with optional offset from 0 start.
   if (!offset) {

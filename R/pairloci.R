@@ -75,7 +75,7 @@ qb.pairloci <- function(qbObject, chr, ...)
   class(d) <- c("qb.pairloci", "matrix")
   attr(d, "chr") <- chr
   attr(d, "niter") <- qb.niter(qbObject)
-  attr(d, "map") <- pull.map(qb.cross(qbObject, genoprob = FALSE))[chr]
+  attr(d, "map") <- qtl::pull.map(qb.cross(qbObject, genoprob = FALSE))[chr]
   attr(d, "post") <-
     qb.pair.posterior(qbObject, pairloci = pairloci)[paste(chr, collapse = ".")]
   d
@@ -83,7 +83,7 @@ qb.pairloci <- function(qbObject, chr, ...)
 ##############################################################################
 summary.qb.pairloci <- function(object, ...)
 {
-  rbind(apply(object,2,quantile, c(.25,.5,.75)),
+  rbind(apply(object,2, stats::quantile, c(.25,.5,.75)),
         samples=nrow(object),
         percent = round(100 * nrow(object) / attr(object, "niter"), 3))
 }
@@ -106,17 +106,17 @@ plot.qb.pairloci <- function(x, main = mainchr, cex = 0.75, ...)
   
   plot(x, cex = cex, xlim = rng[[1]], ylim = rng[[2]])
   for(r in 1:2)
-    axis(r, map[[r]], lwd = 3, labels = FALSE)
-  abline(v = median(x[, 1]), h = median(x[, 2]),
+    graphics::axis(r, map[[r]], lwd = 3, labels = FALSE)
+  graphics::abline(v = stats::median(x[, 1]), h = stats::median(x[, 2]),
          lty = 2, lwd = 3, col = "blue")
 
   ## Plots only in uppertriangle if chr are the same.
   if(chr[1] == chr[2])
-    abline(0, 1)
+    graphics::abline(0, 1)
 
   ## Add title.
   mainchr <- paste(chr[1], " by ", chr[2]," (", post, "%)", sep = "")
-  title(main)
+  graphics::title(main)
   invisible()
 }
 ##############################################################################
@@ -167,7 +167,7 @@ summary.qb.epistasis <- function(object, ...)
   
   signif(cbind("%" =  attr(object, "post"),
                apply(tmp, 2,
-                     function(x, y) tapply(x, y, median),
+                     function(x, y) tapply(x, y, stats::median),
                      object[, nc])),
          3)
 }
@@ -177,27 +177,26 @@ print.qb.epistasis <- function(x, ...) print(summary(x, ...))
 plot.qb.epistasis <- function(x, effects = names(x)[-length(x)],
                               cex = 0.5, main = effects, ...)
 {
-  require("lattice")
-  trellis.par.set(theme=col.whitebg(), warn = FALSE)
+  lattice::trellis.par.set(theme=lattice::col.whitebg(), warn = FALSE)
 
   effects <- effects[ match(names(x), effects, nomatch = 0) ]
   main <- array(main, length(effects))
   for(j in seq(along = effects)) {
-    form <- formula(paste(effects[j], "inter", sep = "~"))
-    print(bwplot(form, x, jitter = TRUE, factor = 1, cex = cex,
+    form <- stats::formula(paste(effects[j], "inter", sep = "~"))
+    print(lattice::bwplot(form, x, jitter = TRUE, factor = 1, cex = cex,
                  col = "gray75", lwd = 2,
                  xlab = "epistatic pair", ylab = "epistatic effect",
                  panel = function(x, y, ...) {
-                   panel.abline(h = 0, lwd = 3, lty = 2, col = "red")
-                   panel.stripplot(x,y,...)
+                   lattice::panel.abline(h = 0, lwd = 3, lty = 2, col = "red")
+                   lattice::panel.stripplot(x,y,...)
                    lx <- levels(x)
                    if(sum(y != 0) > 100)
-                     panel.bwplot(x, y, ..., do.out = FALSE)
+                     lattice::panel.bwplot(x, y, ..., do.out = FALSE)
                    for(i in seq(along = lx)) {
                      ii <- (x == lx[i])
                      if(any(ii))
-                       panel.lines(i+c(-0.25,0.25),
-                                   rep(median(y[ii], na.rm = TRUE), 2),
+                       lattice::panel.lines(i+c(-0.25,0.25),
+                                   rep(stats::median(y[ii], na.rm = TRUE), 2),
                                    lwd = 5, col = "blue")
                    }
                  },
@@ -212,7 +211,7 @@ qb.chrom <- function(qbObject, ...)
 {
   geno.names <- qb.geno.names(qbObject)
   chrom <- c(table(geno.names[qb.get(qbObject, "mainloci", ...)$chrom]))[geno.names]
-  maplen <- unlist(lapply(pull.map(qb.cross(qbObject, genoprob = FALSE)),
+  maplen <- unlist(lapply(qtl::pull.map(qb.cross(qbObject, genoprob = FALSE)),
                            function(x) diff(range(x))))
   niter <- qb.niter(qbObject)
   ## caution: posterior does not account for duplicate chromosomes
@@ -247,7 +246,7 @@ qb.pairs <- function(qbObject, cutoff = 1, nmax = 15, ...)
   if(length(posterior) > nmax)
     posterior <- posterior[1:nmax]
 
-  maplen <- unlist(lapply(pull.map(qb.cross(qbObject, genoprob = FALSE)),
+  maplen <- unlist(lapply(qtl::pull.map(qb.cross(qbObject, genoprob = FALSE)),
                           function(x)diff(range(x))))
   i <- !duplicated(inter)
   prior <- maplen[pairloci$chrom1[i]] * maplen[pairloci$chrom2[i]]
@@ -270,35 +269,35 @@ plot.qb.pattern <- function (x, bars = seq(x$posterior),
   threshold = c(weak = 3, moderate = 10, strong = 30), units = 2, 
   rescale = TRUE, col.prior = "blue", ...) 
 {
-  bar <- barplot(c(x$posterior), col = "white", names = bars, ...)
+  bar <- graphics::barplot(c(x$posterior), col = "white", names = bars, ...)
   tmp <- if (rescale) 
     x$prior * 0.99 * max(x$posterior) / max(x$prior)
   else x$prior
-  lines(bar, tmp, type = "b", col = col.prior, lwd = 2)
+  graphics::lines(bar, tmp, type = "b", col = col.prior, lwd = 2)
   if (!is.null(barlabels)) {
     cex <- 1
-    text(bar, 0, barlabels, srt = 90, adj = 0, cex = cex)
+    graphics::text(bar, 0, barlabels, srt = 90, adj = 0, cex = cex)
     
   }
-  mtext(labels[1], 1, 2)
-  mtext(labels[2], 2, 2)
-  mtext(labels[3], 3, 0.5)
+  graphics::mtext(labels[1], 1, 2)
+  graphics::mtext(labels[2], 2, 2)
+  graphics::mtext(labels[3], 3, 0.5)
   x$bf[x$bf == 0 | x$prior == 0] <- NA
   plot(seq(bars), x$bf, log = "y", xaxt = "n",
        xlim = c(0.5, length(bars)), xlab = "", ylab = "", ...)
-  mtext(labels[1], 1, 2)
-  mtext("posterior / prior", 2, 2)
-  mtext("Bayes factor ratios", 3, 0.5)
-  axis(1, seq(bars), bars)
+  graphics::mtext(labels[1], 1, 2)
+  graphics::mtext("posterior / prior", 2, 2)
+  graphics::mtext("Bayes factor ratios", 3, 0.5)
+  graphics::axis(1, seq(bars), bars)
   if (!is.null(barlabels)) {
-    cxy <- par("cxy")[1] * cex/2
+    cxy <- graphics::par("cxy")[1] * cex/2
 
     ## Count number of QTL terms separated by commas.
     nqtl <- sapply(strsplit(barlabels, ","), length)
     nqtl[barlabels == "NULL"] <- 0
-    text(seq(barlabels) - cxy, x$bf, nqtl, srt = 90, cex = cex)
+    graphics::text(seq(barlabels) - cxy, x$bf, nqtl, srt = 90, cex = cex)
   }
-  usr <- 10^par("usr")[3:4]
+  usr <- 10^graphics::par("usr")[3:4]
   for (i in seq(bars)) {
     if (x$bfse[i] > 0) {
       bfbar <- x$bf[i] + c(-units, units) * x$bfse[i]
@@ -306,20 +305,20 @@ plot.qb.pattern <- function (x, bars = seq(x$posterior),
       bfbar[2] <- min(usr[2], bfbar[2])
     }
     else bfbar <- usr
-    lines(rep(i, 2), bfbar)
+    graphics::lines(rep(i, 2), bfbar)
   }
   if (length(threshold)) {
     bars <- floor(mean(seq(bars))/2) + 0.5
     maxusr <- usr[2]
     usr <- prod(usr^c(0.95, 0.05))
-    lines(bars + c(-0.25, 0.25), rep(usr, 2), lwd = 3, col = col.prior)
+    graphics::lines(bars + c(-0.25, 0.25), rep(usr, 2), lwd = 3, col = col.prior)
     texusr <- usr
     for (i in seq(length(threshold))) {
       sigusr <- min(maxusr, usr * threshold[i])
       if (texusr < maxusr) 
-        text(bars + 0.5, sqrt(texusr * sigusr), names(threshold)[i], 
+        graphics::text(bars + 0.5, sqrt(texusr * sigusr), names(threshold)[i], 
              col = col.prior, adj = 0)
-      arrows(bars, usr, bars, sigusr, 0.1, lwd = 3, col = col.prior)
+      graphics::arrows(bars, usr, bars, sigusr, 0.1, lwd = 3, col = col.prior)
       texusr <- sigusr
     }
   }

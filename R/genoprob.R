@@ -25,16 +25,16 @@ qb.genoprob <- function(cross, map.function = map.functions, step = 2,
 {
   ## This uses calc.genoprob directly.
   ## Call sequence maintained for legacy user code.
-  map.functions <- unlist(as.list(formals(calc.genoprob)$map.function)[-1])
+  map.functions <- unlist(as.list(formals(qtl::calc.genoprob)$map.function)[-1])
   map.function <- match.arg(tolower(map.function[1]), map.function)
 
   ## First make sure QTL are not too close.
-  if(any(sapply(pull.map(cross), function(x)
+  if(any(sapply(qtl::pull.map(cross), function(x)
                 ifelse(length(x) > 1, max(diff(x)) < tolerance, FALSE))))
-    cross <- jittermap(cross, tolerance)
+    cross <- qtl::jittermap(cross, tolerance)
   
   ## Call R/qtl routine calc.genoprob for calculations.
-  cross <- calc.genoprob(cross, step, map.function = map.function,
+  cross <- qtl::calc.genoprob(cross, step, map.function = map.function,
                          stepwidth = stepwidth,
                          ...)
 
@@ -45,9 +45,9 @@ qb.genoprob <- function(cross, map.function = map.functions, step = 2,
 }
 
 qb.humanGenoProb <- function(cross,fill.missing=TRUE,cc.col=NULL){
-    n.chr = nchr(cross)
-    n.ind = nind(cross)
-    n.mar = nmar(cross)
+    n.chr = qtl::nchr(cross)
+    n.ind = qtl::nind(cross)
+    n.mar = qtl::nmar(cross)
     grid = cross$geno
     for(i in 1:n.chr) {
       grid[[i]] = cross$geno[[i]]$map
@@ -68,7 +68,7 @@ qb.humanGenoProb <- function(cross,fill.missing=TRUE,cc.col=NULL){
       attr(cross$geno[[i]]$prob,"stepwidth") = "variable"
       attr(cross$geno[[i]]$prob,"tolerance") = 1e-06
       if(fill.missing) {
-        if(is.null(cc.col)|length(unique(na.omit(cross$pheno[,cc.col])))!=2) {
+        if(is.null(cc.col)|length(unique(stats::na.omit(cross$pheno[,cc.col])))!=2) {
           w = apply(cross$geno[[i]]$data,2,table)
           wsum = apply(w,2,sum)
           for(k in 1:n.gen) {

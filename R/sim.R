@@ -65,7 +65,7 @@ if(is.vector(qtl.epis)) qtl.epis = t(as.matrix(qtl.epis))
     for(i in 1:n.chr) {
        map[[i]] <-c(0,len[i])
        if(n.mar[[i]]>2) {
-          if(!eq.spacing) map[[i]] <- sort(c(map[[i]],runif(n.mar[i]-2,0,len[i])))
+          if(!eq.spacing) map[[i]] <- sort(c(map[[i]],stats::runif(n.mar[i]-2,0,len[i])))
           else map[[i]] <- seq(0,len[i],length=n.mar[i])
        }     
        names(map[[i]]) <- paste("C",names(map)[i],"M",1:n.mar[i],sep = "")
@@ -149,8 +149,7 @@ if(is.vector(qtl.epis)) qtl.epis = t(as.matrix(qtl.epis))
 
   mu = rep(10,n.pheno)
 #  Sigma=sigma %x% diag(n.ind) 
-require(MASS)
-    pheno.normal <- mvrnorm(n.ind,mu,sigma)   # mu=10, ve=1 
+    pheno.normal <- MASS::mvrnorm(n.ind,mu,sigma)   # mu=10, ve=1 
     residual <- pheno.normal - mu
 
     # Main effects added
@@ -295,7 +294,7 @@ if(!is.null(qtl.epis)) {
        names(covariate) <- c("fix.cov", "ran.cov")
        fix.cov <- sample(c(0,1),n.ind,replace = TRUE)
        random.cov <- sample(0:4,n.ind,replace = TRUE)
-       random.coe <- rnorm(5,0,covariate[2]^0.5)
+       random.coe <- stats::rnorm(5,0,covariate[2]^0.5)
        random <- rep(0,n.ind)
        for(i in 1:n.ind) {
            for(j in 1:5) 
@@ -361,7 +360,7 @@ if(!is.null(qtl.epis)) {
 
 # truncate pheno.nomal to ordinal (binary) phenotypes
  if(!multiple.trait){
-    p <- quantile(pheno.normal,probs=cumsum(ordinal))
+    p <- stats::quantile(pheno.normal,probs=cumsum(ordinal))
     pheno.ordinal <- as.numeric(factor(cut(pheno.normal,breaks=c(-Inf,p,Inf)))) - 1
 }
   
@@ -369,7 +368,7 @@ if(!is.null(qtl.epis)) {
 # save variances explained by covariates and g-e interactions into qtl
  
     qtl <- list()
-    vp <- var(pheno.normal)
+    vp <- stats::var(pheno.normal)
 #    qtl$var <- sigma
     if(n.qtl > 0) {
        qtl$geno <- qtl.geno

@@ -119,7 +119,7 @@ qb.hpdone <- function(qbObject, level = 0.5, profile = "2logBF",
     attr(out, "effects") <- effects
     attr(out, "hpd.height") <- hpd
     attr(out, "hpd.level") <- level
-    attr(out, "map.range") <- lapply(pull.map(qb.cross(qbObject, genoprob = FALSE)), range)
+    attr(out, "map.range") <- lapply(qtl::pull.map(qb.cross(qbObject, genoprob = FALSE)), range)
     out
 
     ## Might consider separate lines at epistasis and main?
@@ -201,8 +201,8 @@ plot.qb.hpdone <- function(x, chr = chrs, ...)
     ## With one chr, scanone starts at 0 now.
     map <- 0
 
-  tmpar <- par(mfrow = c(2,1), mar = c(4.1,4.1,3.1,0.1))
-  on.exit(par(tmpar))
+  tmpar <- graphics::par(mfrow = c(2,1), mar = c(4.1,4.1,3.1,0.1))
+  on.exit(graphics::par(tmpar))
 
   ## NB: scan takes numeric chr for now.
   plot(x$profile, chr = chr, ...)
@@ -213,11 +213,11 @@ plot.qb.hpdone <- function(x, chr = chrs, ...)
 
   ## Vertical line at peak.
   apply(as.matrix(map + x$hpd.region[chr.hpd,"pos"]), 1, function(x)
-        abline(v = x, lty = 2, lwd = 2, col = "gray"))
+        graphics::abline(v = x, lty = 2, lwd = 2, col = "gray"))
 
   plot(x$effects, chr = chr, ...)
   apply(as.matrix(map + x$hpd.region[chr.hpd,"pos"]), 1, function(x)
-        abline(v = x, lty = 2, lwd = 2, col = "gray"))
+        graphics::abline(v = x, lty = 2, lwd = 2, col = "gray"))
   invisible()
 }
 #######################################################################################3

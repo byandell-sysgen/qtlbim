@@ -30,7 +30,7 @@ qb.sweave <- function(cross, pheno.col = 1, n.iter = 3000, n.draws = 64,
 {
   .qb.name <- deparse(substitute(cross))
   assign(".qb.name", .qb.name, ".GlobalEnv")
-  cross <- subset(clean(cross),
+  cross <- subset(qtl::clean(cross),
                   chr = ("X" != unlist(lapply(cross$geno, class))))
 
   assign(".qb.cross", cross, ".GlobalEnv")
@@ -64,8 +64,7 @@ qb.sweave <- function(cross, pheno.col = 1, n.iter = 3000, n.draws = 64,
 
   assign(".qb.remove", remove.qb, ".GlobalEnv")
 
-  require("tools")
-  Sweave(SweaveFile)
+  utils::Sweave(SweaveFile)
 }
 #################################################3
 ## Set up genetic architecture as list.
@@ -310,17 +309,17 @@ step.fitqtl <- function(cross, qtl, pheno.col = 1, arch,
   else
     my.epis <- NULL
   my.formula <-
-    formula(paste("y ~", paste(c(my.main, my.epis), collapse = "+")))
+    stats::formula(paste("y ~", paste(c(my.main, my.epis), collapse = "+")))
 
   ## Fit model.
   ## R/qtl fitqtl changed with 1.08-43, but not released yet.
-  old.fitqtl <- compareVersion(qtlversion(), "1.08-43") < 0
+  old.fitqtl <- utils::compareVersion(qtl::qtlversion(), "1.08-43") < 0
   if(old.fitqtl)
     myfitqtl <- function(cross, pheno.col, ...)
-      fitqtl(cross$pheno[[pheno.col]], ...)
+      qtl::fitqtl(cross$pheno[[pheno.col]], ...)
   else
     myfitqtl <- function(cross, pheno.col, ...)
-      fitqtl(cross, pheno.col, ...)
+      qtl::fitqtl(cross, pheno.col, ...)
   
   cross.fit <- myfitqtl(cross, pheno.col, qtl,
                       formula = my.formula)
@@ -378,7 +377,7 @@ step.fitqtl <- function(cross, qtl, pheno.col = 1, arch,
         my.epis <- NULL
     }
     my.formula <-
-      formula(paste("y ~", paste(c(my.main, my.epis), collapse = "+")))
+      stats::formula(paste("y ~", paste(c(my.main, my.epis), collapse = "+")))
 
     ## Refit model.
     cross.fit <- myfitqtl(cross, pheno.col, qtl,
@@ -451,7 +450,7 @@ anova.step.fitqtl <- function(object, object2, ...)
   stat <- difit["Model", "MS"] / difit["Error", "MS"]
   df1 <- difit["Model", "df"]
   df2 <- difit["Error", "df"]
-  difit["Model", "Pvalue(Chi2)"] <- signif(1 - pchisq(stat * df1, df1), 3)
-  difit["Model", "Pvalue(F)"] <- signif(1 - pf(stat, df1, df2), 3)
+  difit["Model", "Pvalue(Chi2)"] <- signif(1 - stats::pchisq(stat * df1, df1), 3)
+  difit["Model", "Pvalue(F)"] <- signif(1 - stats::pf(stat, df1, df2), 3)
   print(difit, quote = FALSE, na.print = "")
 }

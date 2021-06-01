@@ -51,8 +51,8 @@ if(!exists("cross.arch") | !exists("qbExample"))
   example(qb.arch)
   cross <- qb.cross(qbExample)
 }
-cross <- sim.geno(cross, n.draws = 8, step = 2, error = 0.01)
-qtl <- makeqtl(cross, chr = c(1,1,2,3), pos = c(15,45,12,15))
+cross <- qtl::sim.geno(cross, n.draws = 8, step = 2, error = 0.01)
+qtl <- qtl::makeqtl(cross, chr = c(1,1,2,3), pos = c(15,45,12,15))
 cross.step <- step.fitqtl(cross, qtl, pheno.col = 3, arch = cross.arch)
 anova(cross.step)
 cross.step$arch

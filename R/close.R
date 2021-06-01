@@ -207,7 +207,7 @@ qb.distlocus <- function(sample, target)
   
   ## Generate matrix with all combinations of n.target
   ## subsets fo n.sample.
-  sample.locus <- combn(sample, n.target)
+  sample.locus <- utils::combn(sample, n.target)
   
   ## Find which k-tuple of sample.locus is closest to
   ## which k-tuple of target.locus.
@@ -218,7 +218,7 @@ qb.distlocus <- function(sample, target)
   ## Find which subset of sample is closest to target.
   wh <- which.min(alldist)
   tmp <- seq(n.sample)
-  wh <- combn(tmp, n.target)[, col(alldist)[wh]]
+  wh <- utils::combn(tmp, n.target)[, col(alldist)[wh]]
 
   ## Return sample.set as logical vector.
   !is.na(match(tmp, wh))
@@ -403,7 +403,7 @@ plot.qb.close <- function(x, category = c("pattern", "nqtl"),
   else
     category <- match.arg(category)
   switch(category,
-         nqtl = print(bwplot(ordered(n.qtl) ~ score, x, xlab = xlab, ...), ...),
+         nqtl = print(lattice::bwplot(ordered(n.qtl) ~ score, x, xlab = xlab, ...), ...),
          pattern = {
            ## For pattern, want to ideally aggregate I think.
            ## At very least, only consider more frequent QTL.
@@ -426,7 +426,7 @@ plot.qb.close <- function(x, category = c("pattern", "nqtl"),
                                         data$pattern, mean))[names(pct)])
              ordered(tmp2[tmp], tmp2[o])
            }
-           print(bwplot(pattern ~ score, data, xlab = xlab, ...), ...)
+           print(lattice::bwplot(pattern ~ score, data, xlab = xlab, ...), ...)
          })
 }
 #######################################################################
@@ -515,7 +515,7 @@ qb.patternave <- function(qbObject, epistasis = TRUE, pattern, nqtl, pct,
   if(center == "mean")
     myave <- mean
   else
-    myave <- median
+    myave <- stats::median
   
   ## Score each sample against target.
   if(include == "exact") {
@@ -531,7 +531,7 @@ qb.patternave <- function(qbObject, epistasis = TRUE, pattern, nqtl, pct,
     targets <- unique(pattern)
 
     for(i in c("locus","variance")) {
-      tmp <- tapply(iters[, i], index, quantile, level)
+      tmp <- tapply(iters[, i], index, stats::quantile, level)
       conf[, paste(i, "LCL", sep = ".")] <-
         unlist(sapply(tmp, function(x) x[1]))
       conf[, paste(i, "UCL", sep = ".")] <-
@@ -580,7 +580,7 @@ qb.patternave <- function(qbObject, epistasis = TRUE, pattern, nqtl, pct,
         tmp <- match(chrs, names(tmp2), nomatch = 0)
         sumpat[pattern.sumpat == i, j][tmp > 0] <- tmp2[tmp]
 
-        tmp2 <- tapply(itersi[, j], splitsi, quantile, level)
+        tmp2 <- tapply(itersi[, j], splitsi, stats::quantile, level)
         conf[pattern.sumpat == i, paste(j, "LCL", sep = ".")][tmp > 0] <-
           unlist(sapply(tmp2, tmpfn2, 1)[tmp])
         conf[pattern.sumpat == i, paste(j, "UCL", sep = ".")][tmp > 0] <-
@@ -821,8 +821,8 @@ plot.qb.BestPattern <- function(x, type = c("mds","hclust"),
   cexs <- 1 + (cexmax - 1) * tmp
   cols <- paste("gray", colmax - round(colmax * sqrt(tmp)), sep = "")
   
-  hc <- hclust(x$dist, method = method)
-  cluster <- cutree(hc, k = cluster)
+  hc <- stats::hclust(x$dist, method = method)
+  cluster <- stats::cutree(hc, k = cluster)
   symbols <- switch(symbol,
                     pattern = names(x$pct),
                     nqtl = x$nqtl,
@@ -834,7 +834,7 @@ plot.qb.BestPattern <- function(x, type = c("mds","hclust"),
 
   switch(type,
          mds = {
-           mds <- cmdscale(x$dist, eig = TRUE)
+           mds <- stats::cmdscale(x$dist, eig = TRUE)
            xmds <- range(mds$points[,1] * (1 + 0.5 * cexmax))
            ymds <- range(mds$points[,2] * (1 + 0.01 * cexmax))
            o <- order(cex)
@@ -846,7 +846,7 @@ plot.qb.BestPattern <- function(x, type = c("mds","hclust"),
                   ylab = "explained variance",
                   main = main, xaxt = "n",
                   ...)
-             text(rep(1, length(o)), x$score[o], symbols[o],
+             graphics::text(rep(1, length(o)), x$score[o], symbols[o],
                   cex = cex[o], col = col[o])
            }
            else {
@@ -857,7 +857,7 @@ plot.qb.BestPattern <- function(x, type = c("mds","hclust"),
                     sep = ""),
                   main = main,
                   ...)
-             text(mds$points[o, 1], mds$points[o, 2], symbols[o],
+             graphics::text(mds$points[o, 1], mds$points[o, 2], symbols[o],
                   cex = cex[o], col = col[o])
            }
          },
@@ -875,12 +875,12 @@ summary.qb.BestPattern <- function(object, method = "complete",
   object <- qb.patterndist(object, ...)
   
   out <- list(max.qtl = object$max.qtl)
-  hc <- hclust(object$dist, method = method)
+  hc <- stats::hclust(object$dist, method = method)
 
   out$summary <- data.frame(terms = object$nqtl, 
                             percent = object$pct,
                             score = object$score,
-                            cluster = cutree(hc, k = cluster))[hc$order, ]
+                            cluster = stats::cutree(hc, k = cluster))[hc$order, ]
   out$summary <- out$summary[order(-out$summary$score, -out$summary$percent), ]
 
   ## Need to use [patterns != "NULL"] below to get this right.

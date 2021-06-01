@@ -75,7 +75,7 @@ qb.multloci <- function(qbObject, chr = 1, cutoff = 25, nqtl = NULL, ...)
   attr(res, "chr") <- chr
   attr(res, "cex") <- qb.cex(qbObject)
   attr(res, "step") <- qb.get(qbObject, "step")
-  attr(res, "pos") <- pull.map(qb.cross(qbObject, genoprob = FALSE))[[chr]]
+  attr(res, "pos") <- qtl::pull.map(qb.cross(qbObject, genoprob = FALSE))[[chr]]
   attr(res, "niter") <- qb.niter(qbObject)
   res
 }
@@ -140,8 +140,7 @@ plot.qb.multloci <- function(x, amount = .5, cex = attr(x, "cex"),
 {
   chr <- attr(x, "chr")
   pos <- attr(x, "pos")
-  require("lattice")
-  trellis.par.set(theme = col.whitebg(), warn = FALSE) ## white background
+  lattice::trellis.par.set(theme = lattice::col.whitebg(), warn = FALSE) ## white background
 
   ## Split can be logical or numeric.
   ## If numeric, plot only those pages.
@@ -187,11 +186,11 @@ plot.qb.multloci <- function(x, amount = .5, cex = attr(x, "cex"),
         if(weight) {
           weights <- 1 / table.niter[as.character(x$mainloci$niter)]
           weights <- weights / sum(weights)
-        dens <- density(locus.more$locus, weights = weights)
+        dens <- stats::density(locus.more$locus, weights = weights)
           darg <- list(weights = weights)
         }
         else {
-          dens <- density(locus.more$locus)
+          dens <- stats::density(locus.more$locus)
           darg <- list()
         }
       }
@@ -199,24 +198,24 @@ plot.qb.multloci <- function(x, amount = .5, cex = attr(x, "cex"),
       ## Assumes response = locus, group = qtl, number of QTL in nqtl.
       mydensityplot <- function(locus.more, dens, main) {
         if(weight) {
-          densityplot(~locus, locus.more, cex = cex, groups = locus.more$qtl, lty = 1,
+          lattice::densityplot(~locus, locus.more, cex = cex, groups = locus.more$qtl, lty = 1,
                       main = main,
                       panel = function(x, ...) {
                         ## Get trellis plot info.
-                        line.info <- trellis.par.get("superpose.line")
-                        symbol.info <- trellis.par.get("superpose.symbol")
+                        line.info <- lattice::trellis.par.get("superpose.line")
+                        symbol.info <- lattice::trellis.par.get("superpose.symbol")
                         jitter.amount <-
-                          0.01 * diff(current.panel.limits()$ylim)
+                          0.01 * diff(lattice::current.panel.limits()$ylim)
                         uqtl <- sort(unique(locus.more$qtl))
                         for(i in seq(length(uqtl))) {
                           ii <- (uqtl[i] == locus.more$qtl)
                           weights <- 1 / locus.more$nqtl[ii]
                           weights <- weights / sum(weights)
-                          panel.lines(density(locus.more$locus[ii],
+                          lattice::panel.lines(stats::density(locus.more$locus[ii],
                                               weights = weights),
                                       col = line.info$col[i],
                                       lty = 1)
-                          panel.xyplot(x = locus.more$locus[ii],
+                          lattice::panel.xyplot(x = locus.more$locus[ii],
                                        y = jitter(rep(0,
                                          length(locus.more$locus[ii])),
                                          amount = jitter.amount),
@@ -225,27 +224,27 @@ plot.qb.multloci <- function(x, amount = .5, cex = attr(x, "cex"),
                                        ...)
                         }
                         if(nqtl.more) {
-                          panel.abline(v = valleys, lty = 2,
+                          lattice::panel.abline(v = valleys, lty = 2,
                                        col = "darkgray")
-                          panel.lines(dens$x,
+                          lattice::panel.lines(dens$x,
                                       (1 + length(valleys)) * dens$y,
                                       col = "black", lty = 3)
                         }
-                        panel.rug(x = pos, end = 0.02, quiet = TRUE,
+                        lattice::panel.rug(x = pos, end = 0.02, quiet = TRUE,
                                   col = "black")
                       })
         }
         else {
-          densityplot(~locus, locus.more, cex = cex, groups = locus.more$qtl, lty = 1,
+          lattice::densityplot(~locus, locus.more, cex = cex, groups = locus.more$qtl, lty = 1,
                       main = main,
                       panel = function(x, ...) {
-                        panel.superpose(x, ...)
+                        lattice::panel.superpose(x, ...)
                         if(nqtl.more) {
-                          panel.abline(v = valleys, lty = 2, col = "darkgray")
-                          panel.lines(dens$x, (1 + length(valleys)) * dens$y,
+                          lattice::panel.abline(v = valleys, lty = 2, col = "darkgray")
+                          lattice::panel.lines(dens$x, (1 + length(valleys)) * dens$y,
                                       col = "black", lty = 3)
                         }
-                        panel.rug(x = pos, end = 0.02, quiet = TRUE, col = "black")
+                        lattice::panel.rug(x = pos, end = 0.02, quiet = TRUE, col = "black")
                       },
                       panel.groups = "panel.densityplot")
         }
@@ -258,11 +257,11 @@ plot.qb.multloci <- function(x, amount = .5, cex = attr(x, "cex"),
       }
       else {
         tmp <- c("=",">=")[1 + (locus.more$nqtl > c(x$nqtl.est))]
-        print(densityplot(~locus | factor(paste("n.qtl", tmp, locus.more$nqtl)),
+        print(lattice::densityplot(~locus | factor(paste("n.qtl", tmp, locus.more$nqtl)),
                           locus.more, cex = cex, groups = locus.more$qtl, lty = 1,
                           panel = function(x, ...) {
-                            panel.densityplot(x, ...)
-                            panel.rug(x = pos, end = 0.02, quiet = TRUE, col = "black")
+                            lattice::panel.densityplot(x, ...)
+                            lattice::panel.rug(x = pos, end = 0.02, quiet = TRUE, col = "black")
                           },
                           main = paste("all loci by QTL on chr", chr),
                           layout = c(1, length(unique(locus.more$nqtl)))))
@@ -271,11 +270,11 @@ plot.qb.multloci <- function(x, amount = .5, cex = attr(x, "cex"),
     else {
       ## Density plot of QTL on chr; at most 1 QTL per iteration.
       locus.more$locus <- jitter(locus.more$locus, amount = amount)
-      print(densityplot(~locus, locus.more, cex = cex,
+      print(lattice::densityplot(~locus, locus.more, cex = cex,
                         main = paste("all loci on chr", chr),
                         panel = function(...) {
-                          panel.densityplot(...)
-                          panel.rug(x = pos, end = 0.02, quiet = TRUE,
+                          lattice::panel.densityplot(...)
+                          lattice::panel.rug(x = pos, end = 0.02, quiet = TRUE,
                                     col = "black")
                         }),
             more = split & TRUE,
@@ -285,7 +284,7 @@ plot.qb.multloci <- function(x, amount = .5, cex = attr(x, "cex"),
     
   ## Bar chart of number of QTL.
   if(any(show.plot == 2)) {
-    print(barchart(Percent ~ nqtl,
+    print(lattice::barchart(Percent ~ nqtl,
                    data.frame(Percent = c(x$nqtl.post[[1]]),
                               nqtl = names(x$nqtl.post[[1]])),
                    main = paste("number of QTL on chr", chr)),
@@ -304,15 +303,15 @@ plot.qb.multloci <- function(x, amount = .5, cex = attr(x, "cex"),
       locus.more$nqtl <-
         table(x$pairloci$niter)[as.character(x$pairloci$niter)]
       if(nqtl.more)
-        dens <- density(locus.more$locus)
+        dens <- stats::density(locus.more$locus)
       if(nqtl.more) {
         if(weight) {
           weights <- 1 / locus.more$nqtl
           weights <- weights / sum(weights)
-          dens <- density(locus.more$locus, weights = weights)
+          dens <- stats::density(locus.more$locus, weights = weights)
         }
         else
-          dens <- density(locus.more$locus)
+          dens <- stats::density(locus.more$locus)
       }
       print(mydensityplot(locus.more, dens,
                           paste("epi loci by QTL on chr", chr)),
@@ -363,14 +362,14 @@ plot.qb.multloci <- function(x, amount = .5, cex = attr(x, "cex"),
         if(weight) {
           weights <- 1 / (locus.more$nqtl - 1)
           weights <- weights / sum(weights)
-          contours <- loess(point ~ locus1 * locus2, locus.more, weights)
+          contours <- stats::loess(point ~ locus1 * locus2, locus.more, weights)
         }
         else
-          contours <- loess(point ~ locus1 * locus2, locus.more)
-        contours <- c(predict(contours, grid))
+          contours <- stats::loess(point ~ locus1 * locus2, locus.more)
+        contours <- c(stats::predict(contours, grid))
         ## Force zero on epistasis side.
         contours[grid$locus1 <= grid$locus2] <- 0
-        contours <- contourLines(loci, loci,
+        contours <- grDevices::contourLines(loci, loci,
                                  matrix(contours, length(loci), length(loci)),
                                  levels = pretty(max(contours, na.rm = TRUE) * c(0.6, 1)))
         rm(loci)
@@ -382,23 +381,23 @@ plot.qb.multloci <- function(x, amount = .5, cex = attr(x, "cex"),
       
       ## XY plot with optional contour lines.
       tmp <- range(locus.one, locus.more$locus1, locus.more$locus2)
-      print(xyplot(locus2 ~ locus1, locus.more, cex = cex, groups = locus.more$nqtl,
+      print(lattice::xyplot(locus2 ~ locus1, locus.more, cex = cex, groups = locus.more$nqtl,
                    xlim = tmp, ylim = tmp,
                    panel = function(x,y,...) {
-                     panel.abline(0,1, col = "gray")
-                     panel.abline(v = valleys, h = valleys,
+                     lattice::panel.abline(0,1, col = "gray")
+                     lattice::panel.abline(v = valleys, h = valleys,
                                   lty = 2, col = "darkgray")
                      if(length(locus.one))
-                       panel.points(jitter(locus.one, amount = amount),
+                       lattice::panel.points(jitter(locus.one, amount = amount),
                                     jitter(locus.one, amount = amount),
                                     col = "black", cex = cex)
-                     panel.superpose(x,y, ...)
+                     lattice::panel.superpose(x,y, ...)
                      ## Could use contourLines here instead.
-                     panel.rug(x = pos, end = 0.02, quiet = TRUE)
-                     panel.rug(y = pos, end = 0.02, quiet = TRUE)
+                     lattice::panel.rug(x = pos, end = 0.02, quiet = TRUE)
+                     lattice::panel.rug(y = pos, end = 0.02, quiet = TRUE)
                      if(contour)
                        lapply(contours, function(l)
-                              panel.lines(l$x, l$y, col = "black"))
+                              lattice::panel.lines(l$x, l$y, col = "black"))
                    },
                    panel.groups = "panel.xyplot",
                    main = paste("epi/all pairs by nqtl on chr", chr)),

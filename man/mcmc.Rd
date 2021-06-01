@@ -156,7 +156,7 @@ cross <- qb.genoprob(cross, step=2)
 ## Create MCMC samples
 ## First line as qb.data options; second line has qb.model options.
 qbExample <- qb.mcmc(cross, pheno.col = 3, rancov = 2, fixcov = 1,
-  chr.nqtl = rep(3,nchr(cross)), intcov = 1, interval = rep(10,3),
+  chr.nqtl = rep(3, qtl::nchr(cross)), intcov = 1, interval = rep(10,3),
   n.iter = 1000, n.thin = 20)
 }
 }

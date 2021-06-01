@@ -52,8 +52,8 @@ qb.mcmc <- function(cross,
     cross <- qb.genoprob(cross)
   }
   
-  n.ind = nind(cross)                   # number of individuals
-  n.chr = nchr(cross)                   # number of chromsomes
+  n.ind = qtl::nind(cross)                   # number of individuals
+  n.chr = qtl::nchr(cross)                   # number of chromsomes
   n.gen = dim(cross$geno[[1]]$prob)[3]  # number of genotypes
 ##############################
 ## For Multiple traits -- SB
@@ -127,7 +127,7 @@ if(multiple.trait)
   ##  is required
    Y <- yvalue
    Y[Y==999]=NA
-  sigma.initial <- var(Y,na.rm=TRUE,use="complete.obs")
+  sigma.initial <- stats::var(Y,na.rm=TRUE,use="complete.obs")
   sigma.initial <- solve(sigma.initial)
 }  
 ##########################
@@ -197,7 +197,7 @@ output = output.dir( qbDir = mydir, traitName = allTraits[pheno] )	# set up a di
   }
 
   ## calculate pD and DIC for model comparison
-  deviances = read.table( file = paste(output,"/deviance.dat",sep="") )
+  deviances = utils::read.table( file = paste(output,"/deviance.dat",sep="") )
   pD = mean(deviances[1:n.iter,1],na.rm=TRUE) - deviances[n.iter+1,1]
   DIC = mean(deviances[1:n.iter,1],na.rm=TRUE) + pD
 
@@ -351,23 +351,23 @@ qb.model <- function( cross, epistasis = TRUE,
   max.nqtl = as.integer(max.nqtl) 
   
   if(is.null(interval)) interval = unlist( lapply(cross$geno, function(x) mean(diff(x$map))) ) 
-  n.chr = nchr(cross)                   # number of chromsomes
+  n.chr = qtl::nchr(cross)                   # number of chromsomes
   if(length(interval) == 1)
     interval <- rep(interval, n.chr)
   if(length(interval)<n.chr & !is.null(interval))
      stop("You should specify interval for each chromosome") 
   
-  if(length(chr.nqtl)<nchr(cross) & !is.null(chr.nqtl))
+  if(length(chr.nqtl)<qtl::nchr(cross) & !is.null(chr.nqtl))
      stop("You should specify chr.nqtl for each chromosome") 
   if(is.null(chr.nqtl)) {
      chr.nqtl = unlist( lapply(cross$geno, function(x) diff(range(x$map))) )
-     for(i in 1:nchr(cross)) {
+     for(i in 1:qtl::nchr(cross)) {
         if(interval[i] != 0) chr.nqtl[i] = chr.nqtl[i]/interval[i]
      }
   }
   chr.nqtl = as.integer(chr.nqtl)
 
-  for(i in 1:nchr(cross)) {
+  for(i in 1:qtl::nchr(cross)) {
      if( interval[i] > diff(range(cross$geno[[i]]$map)) ) interval[i] = diff(range(cross$geno[[i]]$map))
      if(interval[i] != 0) {
      	d = diff(range(cross$geno[[i]]$map))/interval[i]   

@@ -110,7 +110,7 @@ covar.var <- function(qbObject)
   }
   cross <- qb.cross(qbObject, genoprob = FALSE)
   covar.name <- names(cross$pheno)[qb.get(qbObject, "covar")[seq(nfixcov)]]
-  cov(as.matrix(cross$pheno[, covar.name]), use = "pair")
+  stats::cov(as.matrix(cross$pheno[, covar.name]), use = "pair")
 }
 ##############################################################################
 qb.varcomp <- function(qbObject, scan = scans, aggregate = TRUE, ...)
@@ -253,8 +253,7 @@ qb.varcomp <- function(qbObject, scan = scans, aggregate = TRUE, ...)
 plot.qb.varcomp <- function(x, log = TRUE, percent = 5,
                              cex = attr.cex, ...)
 {
-  require("lattice")
-  trellis.par.set(theme = col.whitebg(), warn = FALSE) ## white background
+  lattice::trellis.par.set(theme = lattice::col.whitebg(), warn = FALSE) ## white background
 
   attr.cex <- attr(x, "cex")
   x <- data.frame(x)
@@ -266,34 +265,34 @@ plot.qb.varcomp <- function(x, log = TRUE, percent = 5,
     x <- log10(x)
   }
   if(ncol(x) > 1) {
-    print(splom(x, cex = cex,
+    print(lattice::splom(x, cex = cex,
                 panel = function(x,y,...) {
-                  panel.abline(h = 0, v = 0, ...,
+                  lattice::panel.abline(h = 0, v = 0, ...,
                                col = "blue", lwd = 2, lty = 2)
-                  panel.abline(v = median(x, na.rm = TRUE), ...,
+                  lattice::panel.abline(v = stats::median(x, na.rm = TRUE), ...,
                                col = "red", lwd = 2)
-                  panel.abline(v = quantile(x,
+                  lattice::panel.abline(v = stats::quantile(x,
                                  c(percent, 100 - percent) / 100),
                                ..., col = "red", lwd = 2, lty = 3)
-                  panel.abline(h = median(y, na.rm = TRUE), ...,
+                  lattice::panel.abline(h = stats::median(y, na.rm = TRUE), ...,
                                col = "red", lwd = 2)
-                  panel.abline(h = quantile(y,
+                  lattice::panel.abline(h = stats::quantile(y,
                                  c(percent, 100 - percent) / 100),
                                ..., col = "red", lwd = 2, lty = 3)
-                  panel.splom(x,y,...)
+                  lattice::panel.splom(x,y,...)
                 },
                 diag.panel=function(x,...) {
-                  d <- density(x)
+                  d <- stats::density(x)
                   ry <- range(d$y, finite = TRUE)
                   rx <- range(x, finite = TRUE)
                   r <- diff(rx) / diff(ry)
-                  panel.xyplot(d$x, rx[1] + r * d$y, type = "l", lwd = 2)
-                  diag.panel.splom(x,...)
+                  lattice::panel.xyplot(d$x, rx[1] + r * d$y, type = "l", lwd = 2)
+                  lattice::diag.panel.splom(x,...)
                 }))
   }
   else {
-    form <- formula(paste("~", names(x)))
-    print(densityplot(form, x, ...))
+    form <- stats::formula(paste("~", names(x)))
+    print(lattice::densityplot(form, x, ...))
   }
   invisible()
 }
@@ -344,7 +343,7 @@ print.qb.meancomp <- function(x, ...) print(summary(x, ...))
 summary.qb.meancomp <- function(object, percent = 5, ...)
 {
   apply(as.matrix(object), 2, function(x)
-        c(mean = mean(x), quantile(x, c(percent, 100 - percent) / 100)))
+        c(mean = mean(x), stats::quantile(x, c(percent, 100 - percent) / 100)))
 }
 ##############################################################################
 plot.qb.meancomp <- function(x,
@@ -353,8 +352,7 @@ plot.qb.meancomp <- function(x,
                           ...)
 {
   ## Rename: qb.mean.
-  require("lattice")
-  trellis.par.set(theme = col.whitebg(), warn = FALSE) ## white background
+  lattice::trellis.par.set(theme = lattice::col.whitebg(), warn = FALSE) ## white background
 
   nfixcov <- attr(x, "nfixcov")
 
@@ -365,34 +363,34 @@ plot.qb.meancomp <- function(x,
   
   if(nfixcov) {
     ## Scatterplot Matrix using lattice library.
-    print(splom(px, cex = cex,
+    print(lattice::splom(px, cex = cex,
                 panel = function(x,y,...) {
-                  panel.abline(h = 0, v = 0, ...,
+                  lattice::panel.abline(h = 0, v = 0, ...,
                                col = "blue", lwd = 2, lty = 2)
-                  panel.abline(v = median(x, na.rm = TRUE), ...,
+                  lattice::panel.abline(v = stats::median(x, na.rm = TRUE), ...,
                                col = "red", lwd = 2)
-                  panel.abline(v = quantile(x,
+                  lattice::panel.abline(v = stats::quantile(x,
                                  c(percent, 100 - percent) / 100),
                                ..., col = "red", lwd = 2, lty = 3)
-                  panel.abline(h = median(y, na.rm = TRUE), ...,
+                  lattice::panel.abline(h = stats::median(y, na.rm = TRUE), ...,
                                col = "red", lwd = 2)
-                  panel.abline(h = quantile(y,
+                  lattice::panel.abline(h = stats::quantile(y,
                                  c(percent, 100 - percent) / 100),
                                ..., col = "red", lwd = 2, lty = 3)
-                  panel.splom(x,y,...)
+                  lattice::panel.splom(x,y,...)
                 },
                 diag.panel=function(x,...) {
-                  d <- density(x)
+                  d <- stats::density(x)
                   ry <- range(d$y, finite = TRUE)
                   rx <- range(x, finite = TRUE)
                   r <- diff(rx) / diff(ry)
-                  panel.xyplot(d$x, rx[1] + r * d$y, type = "l", lwd = 2)
-                  diag.panel.splom(x,...)
+                  lattice::panel.xyplot(d$x, rx[1] + r * d$y, type = "l", lwd = 2)
+                  lattice::diag.panel.splom(x,...)
                 }))
   }
   else {
-    form <- formula(paste("~", names(px)))
-    print(densityplot(form, px, ...))
+    form <- stats::formula(paste("~", names(px)))
+    print(lattice::densityplot(form, px, ...))
   }
   invisible()
 }
@@ -457,7 +455,7 @@ summary.qb.covar <- function(object, percent = 5, digits = 3, ...)
   chrs <- levels(object[, "chr"])
 
   tmpfn <- function(x)
-    c(mean = mean(x), quantile(x, percent))
+    c(mean = mean(x), stats::quantile(x, percent))
 
   
   tmpfn2 <- function(x,y) {
@@ -477,7 +475,7 @@ summary.qb.covar <- function(object, percent = 5, digits = 3, ...)
   }
   for(i in chrs) {
     ii <- (object[, "chr"] == i)
-    tmp <- cor.test(object[ii, 1], object[ii, 2])
+    tmp <- stats::cor.test(object[ii, 1], object[ii, 2])
     out[i, "correlation"] <- tmp$estimate
     out[i, "p-value"] <- tmp$p.value
   }
@@ -490,16 +488,15 @@ plot.qb.covar <- function(x, percent = 5, cex = attr(x, "cex"),
                            include.zero = TRUE, ...)
 {
   ## Lattice xyplot.
-  require("lattice")
-  trellis.par.set(theme = col.whitebg(), warn = FALSE) ## white background
+  lattice::trellis.par.set(theme = lattice::col.whitebg(), warn = FALSE) ## white background
 
   ## Set up formula for xyplot
   tmp <- names(x)
-  form <- formula(paste(tmp[2], "~", tmp[1], "|", tmp[3]))
+  form <- stats::formula(paste(tmp[2], "~", tmp[1], "|", tmp[3]))
   
-  print(xyplot(form, x, cex = cex,
+  print(lattice::xyplot(form, x, cex = cex,
                panel = function(x,y,...) {
-                 panel.abline(h = 0, v = 0,...,
+                 lattice::panel.abline(h = 0, v = 0,...,
                               col = "blue", lwd = 2, lty = 2)
                  if(include.zero) {
                    x0 <- x
@@ -509,17 +506,17 @@ plot.qb.covar <- function(x, percent = 5, cex = attr(x, "cex"),
                    x0 <- x[x != 0]
                    y0 <- y[y != 0]
                  }
-                 panel.abline(v = mean(x0, na.rm = TRUE), ...,
+                 lattice::panel.abline(v = mean(x0, na.rm = TRUE), ...,
                               col = "red", lwd = 2)
-                 panel.abline(h = mean(y0, na.rm = TRUE), ...,
+                 lattice::panel.abline(h = mean(y0, na.rm = TRUE), ...,
                               col = "red", lwd = 2)
-                 panel.abline(v = quantile(x0,
+                 lattice::panel.abline(v = stats::quantile(x0,
                                 c(percent, 100 - percent) / 100),
                               ..., col = "red", lwd = 2, lty = 3)
-                 panel.abline(h = quantile(y0,
+                 lattice::panel.abline(h = stats::quantile(y0,
                                 c(percent, 100 - percent) / 100),
                               ..., col = "red", lwd = 2, lty = 3)
-                 panel.xyplot(x,y,...)
+                 lattice::panel.xyplot(x,y,...)
                }))
   invisible()
 }
@@ -543,7 +540,7 @@ qb.confound <- function(qbObject, covar = 1)
                                      {
                                        nc <- dim(x$prob)[3]
                                        (x$prob[,,nc] - x$prob[,,1]) / (4 - nc)
-                                     })), nind(cross))
+                                     })), qtl::nind(cross))
 
   ## Kludge to get subset of pseudomarkers. Fix better later.
   ## For instance create pull.prob?
@@ -555,9 +552,9 @@ qb.confound <- function(qbObject, covar = 1)
   pseudomark <- pseudomark[, tmp]
 
   grid$chr <- names(cross$geno)[grid$chr]
-  grid$coradd <- cor(pseudomark, covariate, use = "pairwise.complete.obs")
+  grid$coradd <- stats::cor(pseudomark, covariate, use = "pairwise.complete.obs")
   if(is.f2)
-    grid$cordom <- cor(apply(pseudomark, 2,
+    grid$cordom <- stats::cor(apply(pseudomark, 2,
                              function(x) (x - mean(x, na.rm = TRUE)) ^ 2),
                        covariate, use = "pairwise.complete.obs")
   class(grid) <- c("qb.confound", "scanone", "data.frame")
@@ -599,14 +596,14 @@ plot.qb.confound <- function(x,
   class(x) <- c("scanone", "data.frame")
   
   plot(x, lodcolumn = curves, col = col, ylim = ylim, main = main, ...)
-  abline(h = 0, lty = 3, lwd = 2)
+  graphics::abline(h = 0, lty = 3, lwd = 2)
   
   ## Add SE lines based on correlation.
   tmpfn <- function(x,n) {
     z <- x / sqrt(n - 3)
     (exp(2 * z) - 1) / (exp(2 * z) + 1)
   }
-  abline(h = tmpfn(-1.96, n.cov), lty = 2, lwd = 2)
-  abline(h = tmpfn( 1.96, n.cov), lty = 2, lwd = 2)
+  graphics::abline(h = tmpfn(-1.96, n.cov), lty = 2, lwd = 2)
+  graphics::abline(h = tmpfn( 1.96, n.cov), lty = 2, lwd = 2)
   invisible()
 }  

@@ -12,6 +12,11 @@
 useDynLib(qtlbim)
 
 ############################################################################
+# Import directives.  These directives import functions.
+importFrom("graphics", "barplot", "lines", "points", "text")
+importFrom("stats", "dpois", "median", "na.omit", "quantile", "var")
+importFrom("utils", "compareVersion", "stack")
+############################################################################
 # Export directives.  These directives export functions.  S3 methods for
 # classes declared in the package should be declared with the "S3method"
 # directive.

@@ -59,10 +59,10 @@ qb.condloci <- function(qbObject, chr = 1, cutoff = 25, nqtl = uqtl[nuqtl],
     tmpdata <- data.frame(locus = mainloci$locus[mainloci$nqtl == nqtl])
     tmpdata$qtl <- rep(seq(nqtl), nrow(tmpdata) / nqtl)
     ## Linear discriminant analysis.
-    fit.lda <- lda(as.matrix(tmpdata$locus),tmpdata$qtl)
+    fit.lda <- MASS::lda(as.matrix(tmpdata$locus),tmpdata$qtl)
     if(individual) {
       ## Pick using LDA for each sample. Does not protect against ties.
-      mainloci$qtl <- c(predict(fit.lda, as.matrix(mainloci$locus))$class)
+      mainloci$qtl <- c(stats::predict(fit.lda, as.matrix(mainloci$locus))$class)
     }
     else {
       ## Pick using LDA on mode for index conditional on nqtl.
@@ -71,10 +71,10 @@ qb.condloci <- function(qbObject, chr = 1, cutoff = 25, nqtl = uqtl[nuqtl],
         tmpqtl <- rep(seq(uqtli), nrow(tmpdata) / uqtli)
         mode.qtl <- tapply(locus, tmpqtl,
                            function(locus) {
-                             f <- density(locus)
+                             f <- stats::density(locus)
                              f$x[which.max(f$y)]
                            })
-        c(predict(fit.lda, as.matrix(mode.qtl))$class[tmpqtl])
+        c(stats::predict(fit.lda, as.matrix(mode.qtl))$class[tmpqtl])
       }
       mainloci$qtl <- rep(1, nrow(mainloci))
       myseq <- seq(length(uqtl))
@@ -146,7 +146,7 @@ plot.qb.condloci <- function(x, merge = TRUE, jitter = 0.5, ...)
   if(merge | length(prob) == 1) {
     ## Density plot averaged over number of QTL.
     tmp <- round(100 * table(x$qtl) / niter)
-    densityplot(~locus, x, groups = x$qtl,
+    lattice::densityplot(~locus, x, groups = x$qtl,
                 main = paste("chr = ", chr, ", nqtl = ", nqtl,
                   " (", paste(tmp, collapse = ", "), "%)", sep = ""),
                 ...)
@@ -156,7 +156,7 @@ plot.qb.condloci <- function(x, merge = TRUE, jitter = 0.5, ...)
     tmp <- c("=",">=")[1 + (x$nqtl > nqtl)]
     x$nqtl <- factor(paste("chr = ", chr, ", nqtl ", tmp, " ", x$nqtl,
                            " (", prob[x$nqtl], "%)", sep = ""))
-    densityplot(~locus | nqtl, x, groups = x$qtl,
+    lattice::densityplot(~locus | nqtl, x, groups = x$qtl,
                 layout = c(1,length(prob)))
   }
 }
@@ -213,20 +213,20 @@ qb.epimodes <- function(qbObject, cutoff = 1, nqtl = nqtl.est,
     nqtl <- as.array(nqtl)
     names(nqtl) <- names(nqtl.est)
   }
-  get.mode <- function(x, min.mode = FALSE, f = density(x)) {
+  get.mode <- function(x, min.mode = FALSE, f = stats::density(x)) {
     ## Find location of smoothed maximum or minimum.
     r <- range(x)
     tmp <- f$x >= r[1] & f$x <= r[2]
     f$x[tmp][ifelse(min.mode, which.min(f$y[tmp]), which.max(f$y[tmp]))]
   }
   chrsplit <- function(pairloci, chr, nqtl) {
-    all.loci <- stack(pairloci[pairloci$chrom1 == chr, c("locus1","locus2")])
+    all.loci <- utils::stack(pairloci[pairloci$chrom1 == chr, c("locus1","locus2")])
     if(nqtl == 1) {
       list(peaks = get.mode(all.loci$values))
     }
     else {
       ## Linear discriminant analysis between elements of epistatic pairs.
-      pred.lda <- c(predict(lda(as.matrix(all.loci$values), all.loci$ind),
+      pred.lda <- c(stats::predict(MASS::lda(as.matrix(all.loci$values), all.loci$ind),
                             as.matrix(all.loci$values))$class)
       
       ## Find peaks, then locate valleys between peaks.
@@ -324,7 +324,7 @@ qb.mainmodes <- function(qbObject, cutoff = 25, nqtl = NULL,
     nqtl <- as.array(nqtl)
     names(nqtl) <- names(nqtl.est)
   }
-  get.mode <- function(x, min.mode = FALSE, f = density(x)) {
+  get.mode <- function(x, min.mode = FALSE, f = stats::density(x)) {
     ## Find location of smoothed maximum or minimum.
     r <- range(x)
     tmp <- f$x >= r[1] & f$x <= r[2]
@@ -347,7 +347,7 @@ qb.mainmodes <- function(qbObject, cutoff = 25, nqtl = NULL,
 
       ## Linear discriminant analysis.
       if(max(tapply(nqtl.loci,qtl.id,function(x)diff(range(x))))) {
-        pred.lda <- c(predict(lda(as.matrix(nqtl.loci), qtl.id),
+        pred.lda <- c(stats::predict(MASS::lda(as.matrix(nqtl.loci), qtl.id),
                               as.matrix(all.loci))$class)
         
         ## Find peaks, then locate valleys between peaks.

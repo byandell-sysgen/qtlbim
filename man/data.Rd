@@ -17,7 +17,7 @@ qb.data(cross, pheno.col = 1, trait = c("normal","binary","ordinal"),
   \item{trait}{Type of the quatitative trait or dependent variable: 
                 "normal" or "binary" or "ordinal".}
   \item{censor}{Matrix of censor values with 2 columns and
-    \code{nind(cross)} rows. Details needed here.}
+    \code{\link[qtl]{nind}(cross)} rows. Details needed here.}
   \item{fixcov}{list of fixed covariates. The column number(s) in \code{cross$pheno}
                 which is(are) considered as fixed covariates.}
   \item{rancov}{list of random covariates.The column number(s) in \code{cross$pheno}

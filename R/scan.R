@@ -1161,7 +1161,7 @@ plot.qb.scanone <- function(x, chr = NULL,
       is.sum <- 0
     is.main <- length(scan.main) > 0 & match("main", scan, nomatch = 0)
     is.epis <- length(scan.epis) > 0 & match("epistasis", scan, nomatch = 0)
-    tmpar <- par(mfrow = c((is.sum > 0) + is.main + is.epis, 1),
+    tmpar <- graphics::par(mfrow = c((is.sum > 0) + is.main + is.epis, 1),
                  mar = c(3.1,4.1,2.1,0.1))
     scans <- scan.names[is.sum]
     if(is.main)
@@ -1205,7 +1205,7 @@ plot.qb.scanone <- function(x, chr = NULL,
         row.names(ret) <- rnames
       }
     }
-    par(tmpar)
+    graphics::par(tmpar)
     ret$color <- factor(ret$color)
   }
   else {
@@ -1395,20 +1395,20 @@ plot.qb.to.scanone <- function(x,
     if(i == 1) {
       if(type.scan == "log10") {
         tmp <- c(1,2,5,10,20,50,100,200,500,1000,2000,5000,10000)
-        axis(4,log10(tmp),tmp)
+        graphics::axis(4,log10(tmp),tmp)
       }
       if(type.scan == "estimate")
-        abline(h = 0, col = "grey", lty = 3, lwd = 2)
+        graphics::abline(h = 0, col = "grey", lty = 3, lwd = 2)
     }
   }
   if(allscan)
     if((length(col) < 5 | !missing(sub)) & sub != "")
-      mtext(sub, 1, 2, cex = 0.65)
+      graphics::mtext(sub, 1, 2, cex = 0.65)
 
   ## Annotate axis and add vertical split if one chr and it is split.
   if(length(chr) == 1) {
     if(length(split.chr))
-      abline(v = split.chr[[1]], col = "gray", lty = 2)
+      graphics::abline(v = split.chr[[1]], col = "gray", lty = 2)
   }
 
   invisible(data.frame(color = col, linetype = lty))
@@ -1518,12 +1518,12 @@ qb.centers <- function(object, center.type = c("mode","mean","scan"),
       for(i in seq(length(geno.names))) {
         ii <- object$chr == geno.names[i]
         if(any(ii)) {
-          pos <- weighted.mean(object$pos[ii], niter[ii])
+          pos <- stats::weighted.mean(object$pos[ii], niter[ii])
           centers$pos[geno.names[i]] <- which.min(abs(object$pos[ii] - pos))
 
           tmp <- nmain[ii] > 0
           if(any(tmp)) {
-            m.pos <- weighted.mean(object$pos[ii][tmp], nmain[ii][tmp])
+            m.pos <- stats::weighted.mean(object$pos[ii][tmp], nmain[ii][tmp])
             m.wh <- which.min(abs(object$pos[ii][tmp] - m.pos))
           }
           else
@@ -1533,7 +1533,7 @@ qb.centers <- function(object, center.type = c("mode","mean","scan"),
           if(epistasis) {
             tmp <- nepis[ii] > 0
             if(any(tmp)) {
-              e.pos <- weighted.mean(object$pos[ii][tmp], nepis[ii][tmp])
+              e.pos <- stats::weighted.mean(object$pos[ii][tmp], nepis[ii][tmp])
               e.wh <- which.min(abs(object$pos[ii][tmp] - e.pos))
             }
             else
@@ -1689,7 +1689,7 @@ qb.smoothchr <- function(x, smooth, niter, reference = 0, weight = "sqrt")
 ##############################################################################
 make.atten <- function(pos, smooth, weight)
 {
-  wt <- exp(-as.matrix(dist(pos)) / smooth)
+  wt <- exp(-as.matrix(stats::dist(pos)) / smooth)
   if(weight == "ratten") {
     ## Use weight matrix as sqrt of distances.
     wt <- svd(wt)
@@ -1843,7 +1843,7 @@ qb.scantwo <- function(qbObject, epistasis = TRUE,
   nind.pheno <- qb.nind.pheno(qbObject, pheno.name, nfixcov, cross)
 
   ## Genotype names.
-  map <- pull.map(cross)
+  map <- qtl::pull.map(cross)
   geno.names <- qb.geno.names(qbObject, cross)
   rm(cross)
   gc()
@@ -2377,7 +2377,7 @@ summary.qb.scantwo <- function(object,
     }
     
     ## R/qtl column names changing with 1.04-48.
-    if(compareVersion(qtlversion(), "1.04-48") < 0)
+    if(utils::compareVersion(qtl::qtlversion(), "1.04-48") < 0)
       stop("old version of R/qtl: please update now")
     
     ## The following uses R/qtl's summary.scanone to get mode
@@ -2556,7 +2556,7 @@ qb.scantwo.slice <- function(x2, chr, slice, type.scan, smooth, weight = "sqrt")
                             2, sum, na.rm = TRUE)
     }
     else if(slice["weight"] == 1) {
-      lod2 <- apply(lod2[is.slice, is.chr], 2, weighted.mean,
+      lod2 <- apply(lod2[is.slice, is.chr], 2, stats::weighted.mean,
                     x2$niterone[is.slice], na.rm = TRUE)
     }
     else {
@@ -2773,7 +2773,7 @@ plot.qb.scantwo <- function(x,
       x2$map$chr <- ordered(geno.names[x2$map$chr], geno.names)
 
     ## Plot scantwo object.
-    if(compareVersion(qtlversion(), "1.04-48") < 0)
+    if(utils::compareVersion(qtl::qtlversion(), "1.04-48") < 0)
       stop("old version of R/qtl: please update now")
     
     ## plot.scantwo 1.04 assumes upper triangle is add.
@@ -2791,17 +2791,17 @@ plot.qb.scantwo <- function(x,
     grid <- qb.scantwo.slice(x2, chr, slice, type.scan, smooth, weight)
 
     ## Plot slice.
-    if(var(grid[[4]]) > 0 & show.locus) {
-      tmpar <- par(mfrow=c(2,1), mar=c(2.1,4.1,0.1,0.1))
-      on.exit(par(tmpar))
+    if(stats::var(grid[[4]]) > 0 & show.locus) {
+      tmpar <- graphics::par(mfrow=c(2,1), mar=c(2.1,4.1,0.1,0.1))
+      on.exit(graphics::par(tmpar))
     }
     grid$chr <- ordered(geno.names[grid$chr], geno.names)
     plot(grid, ylim = range(grid[[3]], na.rm = TRUE), ...)
-    abline(h = 0, lty = 3, lwd = 2, col = "red")
-    if(var(grid[[4]]) > 0 & show.locus) {
+    graphics::abline(h = 0, lty = 3, lwd = 2, col = "red")
+    if(stats::var(grid[[4]]) > 0 & show.locus) {
       plot(grid, lodcolumn = 2,
            ylim = range(grid[[4]], na.rm = TRUE), ...)
-      rug(attr(x, "map")[[slice[1]]], 0.02, 2, quiet = TRUE)
+      graphics::rug(attr(x, "map")[[slice[1]]], 0.02, 2, quiet = TRUE)
     }
     invisible(grid)
   }

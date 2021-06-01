@@ -25,7 +25,6 @@ qb.coda <- function(qbObject,
 {
   qb.exists(qbObject)
   
-   require("coda")
    variable.list <- list(iterdiag = c("nqtl","mean","envvar","var"),
                          mainloci = c("chrom","add","dom"),
                          pairloci = c("chrom","aa","ad","da","dd"),
@@ -35,7 +34,7 @@ qb.coda <- function(qbObject,
    tmp <- qb.get(qbObject, element, ...)
    variables <- names(tmp)[match(variables, names(tmp), nomatch = 0)]
    if(length(variables))
-      mcmc(tmp[, variables])
+      coda::mcmc(tmp[, variables])
 }
 
 

@@ -91,8 +91,8 @@ cellmean.plot <- function(x, col = cols, ..., scan, auto.par = TRUE)
   is.bc <- (attr(x, "cross.class") == "bc")
   if(is.bc) {
     if(auto.par) {
-      tmpar <- par(mfcol=c(2,1), mar = c(4.1,4.1,3.1,0.1))
-      on.exit(par(tmpar))
+      tmpar <- graphics::par(mfcol=c(2,1), mar = c(4.1,4.1,3.1,0.1))
+      on.exit(graphics::par(tmpar))
     }
     cols <- c("blue","green")
     names(col) <- scans <- c("AA","HA")
@@ -102,8 +102,8 @@ cellmean.plot <- function(x, col = cols, ..., scan, auto.par = TRUE)
   }
   else {
     if(auto.par) {
-      tmpar <- par(mfcol=c(3,1), mar = c(4.1,4.1,3.1,0.1))
-      on.exit(par(tmpar))
+      tmpar <- graphics::par(mfcol=c(3,1), mar = c(4.1,4.1,3.1,0.1))
+      on.exit(graphics::par(tmpar))
     }
     cols <- c("blue","green","red")
     names(col) <- scans <- c("AA","HA","BA")
@@ -214,7 +214,7 @@ plot.qb.slicetwo <- function(x, byrow = TRUE,
   pos <- attr(x, "pos")
 
   cross <- x$cross.object
-  markers <- find.marker(cross, names(cross$geno)[chr], pos)
+  markers <- qtl::find.marker(cross, names(cross$geno)[chr], pos)
 
   is.bc <- class(cross)[1] == "bc"
   if(is.bc) {
@@ -245,16 +245,16 @@ plot.qb.slicetwo <- function(x, byrow = TRUE,
   is.cellmean <- any(pmatch(tolower(figs), "cellmean", nomatch = 0))
   is.effectplot <- any(pmatch(tolower(figs), "effectplot", nomatch = 0))
   if(is.effectplot & is.null(cross$geno[[1]]$draws))
-    cross <- sim.geno(cross, step = attr(x, "step"))
+    cross <- qtl::sim.geno(cross, step = attr(x, "step"))
   num.plots <- is.profile + is.effects + is.effectplot +
     (3 - 2 * (is.bc | !epistasis)) * is.cellmean
 
   if(auto.par) {
     if(byrow)
-      tmpar <- par(mfrow=c(2, num.plots), mar=c(4.1,4.1,3.1,0.1))
+      tmpar <- graphics::par(mfrow=c(2, num.plots), mar=c(4.1,4.1,3.1,0.1))
     else
-      tmpar <- par(mfcol=c(num.plots, 2), mar=c(4.1,4.1,3.1,0.1))
-    on.exit(par(tmpar))
+      tmpar <- graphics::par(mfcol=c(num.plots, 2), mar=c(4.1,4.1,3.1,0.1))
+    on.exit(graphics::par(tmpar))
   }
 
   for(i in 1:2) {
@@ -268,7 +268,7 @@ plot.qb.slicetwo <- function(x, byrow = TRUE,
       attr(slice.object, "scan") <- attr(x[[ii]], "scans")[[1]]
       attr(slice.object, "reference") <- attr(x[[ii]], "refs")[1]
       plot(slice.object, scan = type.scan, main = paste("epistasis", type.scan, chrbychr))
-      abline(v = pos[i], lty = 2, col = "red")
+      graphics::abline(v = pos[i], lty = 2, col = "red")
     }
     ## Add back in objects from objn.
     if(is.effects) {
@@ -279,7 +279,7 @@ plot.qb.slicetwo <- function(x, byrow = TRUE,
       plot(slice.object, scan = attr(slice.object, "scan"),
            main = paste("epistasis", type.scan, chrbychr))
 
-      abline(v = pos[i], lty = 2, col = "red")
+      graphics::abline(v = pos[i], lty = 2, col = "red")
     }
     if(is.cellmean) {
       ## Slice of Cell means.
@@ -295,7 +295,7 @@ plot.qb.slicetwo <- function(x, byrow = TRUE,
         plot(slice.object, scan = scans[index],
              col = col[index], lty = ltys[index],
              main = paste(type.scan, chrbychr))
-        abline(v = pos[i], lty = 2, col = "red")
+        graphics::abline(v = pos[i], lty = 2, col = "red")
       }
       else {
         tmp <- c("A","H","B")
@@ -308,7 +308,7 @@ plot.qb.slicetwo <- function(x, byrow = TRUE,
                main = paste(type.scan,
                  ifelse(epistasis, paste("slice =", j), ""),
                  chrbychr))
-          abline(v = pos[i], lty = 2, col = "red")
+          graphics::abline(v = pos[i], lty = 2, col = "red")
         }
       }
     }
@@ -316,7 +316,7 @@ plot.qb.slicetwo <- function(x, byrow = TRUE,
       cols <- col
       if(is.bc)
         cols <- col[c(1, length(col))]
-      effectplot(cross, attr(x, "pheno.col"), col = cols,
+      qtl::effectplot(cross, attr(x, "pheno.col"), col = cols,
                  mname1 = markers[i], mname2 = markers[3-i],
                  main = paste("interaction plot", chrbychr))
     }

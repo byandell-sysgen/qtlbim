@@ -8,11 +8,11 @@ fit.main <- function(object, x.main, prior.scale=2.5, prior.df=1,
     stop("model not allowed yet") 
   start.time = Sys.time()
   f = object
-  vars = model.matrix(f, na.action=na.pass)
+  vars = stats::model.matrix(f, na.action = stats::na.pass)
   if(nrow(vars)!=nrow(x.main)) stop("missing data not allowed") 
   if(colnames(vars)[1]=="(Intercept)") vars = vars[, -1, drop=F]
-  intercept = (names(coef(f))[1]=="(Intercept)")
-  n.fit = if(intercept) length(coef(f))-1 else length(coef(f))
+  intercept = (names(stats::coef(f))[1]=="(Intercept)")
+  n.fit = if(intercept) length(stats::coef(f))-1 else length(stats::coef(f))
   if(is.null(vars.keep)) vars.keep = n.fit 
   else if(vars.keep > n.fit) vars.keep = n.fit 
   pre.main = f$main
@@ -27,18 +27,18 @@ fit.main <- function(object, x.main, prior.scale=2.5, prior.df=1,
       if(start > end) break
       vars = data.frame(vars, x.main[,start:end,drop=F], check.names=F)
       vars = vars[,unique(colnames(vars)),drop=F]
-      f = update(f, data=data.frame(vars), prior.scale=prior.scale, prior.df=prior.df)
+      f = stats::update(f, data=data.frame(vars), prior.scale=prior.scale, prior.df=prior.df)
       vars = GetEffects(f, vars.keep=vars.keep, p=p)
       if(j >= n.time) break
     }
     if(!is.null(vars)&ncol(vars)>0)
-      f = update(f, data=data.frame(vars), prior.scale=2.5, prior.df=1)
+      f = stats::update(f, data=data.frame(vars), prior.scale=2.5, prior.df=1)
     else stop("no variables detected")  
   }
   else {
     vars = data.frame(vars, x.main, check.names=F)
     vars = vars[,unique(colnames(vars)),drop=F]
-    f = update(f, data=data.frame(vars), prior.scale=prior.scale, prior.df=prior.df)
+    f = stats::update(f, data=data.frame(vars), prior.scale=prior.scale, prior.df=prior.df)
   }
   if(vars.keep+1 <= ncol(vars))
     main = as.matrix(vars[, (vars.keep+1):ncol(vars), drop=F])
@@ -64,11 +64,11 @@ fit.interaction <- function(object, x.main, inter.type = c("GxG","GxE"),
     stop("model not allowed yet") 
   start.time = Sys.time()
   f = object
-  vars = model.matrix(f, na.action=na.pass)
+  vars = stats::model.matrix(f, na.action = stats::na.pass)
   if(nrow(vars)!=nrow(x.main)) stop("missing data not allowed") 
   if(colnames(vars)[1]=="(Intercept)") vars = vars[, -1, drop=F]
-  intercept = (names(coef(f))[1]=="(Intercept)")
-  n.fit = if(intercept) length(coef(f))-1 else length(coef(f))
+  intercept = (names(stats::coef(f))[1]=="(Intercept)")
+  n.fit = if(intercept) length(stats::coef(f))-1 else length(stats::coef(f))
   if(is.null(vars.keep)) vars.keep = n.fit 
   else if(vars.keep > n.fit) vars.keep = n.fit
   inter.type = inter.type[1]
@@ -94,13 +94,13 @@ fit.interaction <- function(object, x.main, inter.type = c("GxG","GxE"),
       else p.s = rep(s.inter, end-start+1) 
       vars = data.frame(vars, x.inter[, start:end, drop=F], check.names=F)
       vars = vars[,unique(colnames(vars)),drop=F]
-      f = update(f, data=data.frame(vars), prior.scale=p.s, prior.df=prior.df)
+      f = stats::update(f, data=data.frame(vars), prior.scale=p.s, prior.df=prior.df)
       vars = GetEffects(f, vars.keep=vars.keep, p=p)
       n.fit = if(!is.null(vars)) ncol(vars) else 0
       if(j >= n.time) break
     }
     if(!is.null(vars)&ncol(vars)>0)
-      f = update(f, data=data.frame(vars), prior.scale=2.5, prior.df=1)
+      f = stats::update(f, data=data.frame(vars), prior.scale=2.5, prior.df=1)
     else stop("no variables detected") 
   }
   else {
@@ -110,7 +110,7 @@ fit.interaction <- function(object, x.main, inter.type = c("GxG","GxE"),
     }
     vars = data.frame(vars, x.inter, check.names=F)
     vars = vars[,unique(colnames(vars)),drop=F]
-    f = update(f, data=data.frame(vars), prior.scale=prior.scale, prior.df=prior.df)
+    f = stats::update(f, data=data.frame(vars), prior.scale=prior.scale, prior.df=prior.df)
   }
   f$main = pre.main
   stop.time = Sys.time()
@@ -120,13 +120,14 @@ fit.interaction <- function(object, x.main, inter.type = c("GxG","GxE"),
 #*******************************************************************************
 # get significant effects from a fitted model
 # vars.keep is the first vars.keep variables (don't include intercept) to be kept
-GetEffects <- function(object, vars.keep=0, p=0.05, sig=TRUE, na.action=na.pass)
+GetEffects <- function(object, vars.keep=0, p=0.05, sig=TRUE,
+                       na.action = stats::na.pass)
 {
   if(!"glm"%in%class(object)&!"polr"%in%class(object))
     stop("object not allowed yet")
   
   if(any(class(object)=="glm")) {
-    x = model.matrix(object, na.action=na.action)
+    x = stats::model.matrix(object, na.action = na.action)
     colnames(x) = names(object$coefficients)
     pvalue = summary(object, dispersion = object$dispersion)$coefficients[,4]
     if(colnames(x)[[1]]=="(Intercept)"){
@@ -136,11 +137,11 @@ GetEffects <- function(object, vars.keep=0, p=0.05, sig=TRUE, na.action=na.pass)
   }
 
   if(any(class(object)=="polr")) {
-    x = model.matrix(object)[,-1,drop=F]
+    x = stats::model.matrix(object)[,-1,drop=F]
     tvalue = summary(object)$coefficients[,3]
     df.r = object$df.residual
-    if(df.r > 0) pvalue = 2 * pt(-abs(tvalue), df.r)
-    else pvalue = 2 * pnorm(-abs(tvalue))
+    if(df.r > 0) pvalue = 2 * stats::pt(-abs(tvalue), df.r)
+    else pvalue = 2 * stats::pnorm(-abs(tvalue))
     pvalue = pvalue[1:ncol(x)]
   }
                                               
@@ -175,13 +176,13 @@ make.main <- function (cross, loci.names = c("marker","position"),
   }
   
   if(!multipoint) { #remove markers with less than 3 (for F2) or 2 (for BC) genotypes
-    for(i in 1:nchr(cross)) {
+    for(i in 1:qtl::nchr(cross)) {
       geno.m = apply(cross$geno[[i]]$data,2,max,na.rm=T)
       if(class(cross)[1] == "f2") m = 3
       else m = 2 
       if(any(geno.m < m)) {
         geno.0 = geno.m[geno.m < m]
-        cross = drop.markers(cross,names(geno.0))
+        cross = qtl::drop.markers(cross,names(geno.0))
         warning("markers with incomplete genotypes removed")
       }
     }
@@ -191,13 +192,13 @@ make.main <- function (cross, loci.names = c("marker","position"),
       x = table(marker)
       marker = (x[1]<x[3])*(4-marker) + (x[1]>=x[3])*marker
     }
-    for(i in 1:nchr(cross))
+    for(i in 1:qtl::nchr(cross))
       cross$geno[[i]]$data = apply(cross$geno[[i]]$data,2,func)
   } 
   
-  n.chr = nchr(cross)
-  n.ind = nind(cross)
-  n.mar = nmar(cross)
+  n.chr = qtl::nchr(cross)
+  n.ind = qtl::nind(cross)
+  n.mar = qtl::nmar(cross)
   x = vector(mode="list",length=n.chr)
   names(x) = names(cross$geno)
 
@@ -353,8 +354,8 @@ make.main <- function (cross, loci.names = c("marker","position"),
   }
   if(aggregate){
     x.main = x[[1]]
-    if(nchr(cross)>1) 
-      for(j in 2:nchr(cross)) x.main = data.frame(x.main, x[[j]])
+    if(qtl::nchr(cross)>1) 
+      for(j in 2:qtl::nchr(cross)) x.main = data.frame(x.main, x[[j]])
     x.main = x.main[,unique(colnames(x.main)),drop=F] 
   }
   else x.main = x
@@ -364,26 +365,26 @@ make.main <- function (cross, loci.names = c("marker","position"),
 }
 #*******************************************************************************
 # construct interaction matrix
-make.inter <- function(x1, x2, back = 1, na.action = na.pass)  
+make.inter <- function(x1, x2, back = 1, na.action = stats::na.pass)  
 {
 #back = 0, 1
   if(class(x1)=="factor"){
     f = ~ x1
-    mf = model.frame(f, na.action=na.action)
-    x1 = model.matrix(f, mf)[,-1,drop=F]
+    mf = stats::model.frame(f, na.action = na.action)
+    x1 = stats::model.matrix(f, mf)[,-1,drop=F]
   }
   if(class(x2)=="factor"){
     f = ~ x2
-    mf = model.frame(f, na.action=na.action)
-    x2 = model.matrix(f, mf)[,-1,drop=F]
+    mf = stats::model.frame(f, na.action=na.action)
+    x2 = stats::model.matrix(f, mf)[,-1,drop=F]
   }
   x1 = as.matrix(x1)
   x2 = as.matrix(x2)
   if( is.null(colnames(x1))|is.null(colnames(x2)) ) 
     stop("no colnames for the inputs")
   f = ~ x1:x2 - 1
-  mf = model.frame(f, na.action=na.action)
-  z = model.matrix(f, mf)
+  mf = stats::model.frame(f, na.action=na.action)
+  z = stats::model.matrix(f, mf)
   if(ncol(x1)==1|ncol(x2)==1) colnames(z) = paste( paste("x1",colnames(x1),sep=""),":",
                                                    paste("x2",colnames(x2),sep=""), sep="" )
   znames = strsplit(colnames(z),split=":",fixed=T)
@@ -420,9 +421,9 @@ select.cc <- function(cross, cc.col, stra.col, design = c("1:m","1:1"))
   stra = cross$pheno[,stra.col]
   cc = cross$pheno[,cc.col]
   vars = cross$geno[[1]]$data
-  if(nchr(cross)>1)
-    for(j in 2:nchr(cross)) vars = cbind(vars, cross$geno[[j]]$data)
-  data = as.data.frame(cbind(c(1:nind(cross)), cc, vars))
+  if(qtl::nchr(cross)>1)
+    for(j in 2:qtl::nchr(cross)) vars = cbind(vars, cross$geno[[j]]$data)
+  data = as.data.frame(cbind(c(1:qtl::nind(cross)), cc, vars))
   by.stra = split(data, stra)
 
   pairs = function(x) {
@@ -484,7 +485,7 @@ geno.freq <- function(geno, freq=TRUE)
   colnames(counts) = c("c", "h", "r")
   p.HWE = apply(counts, 1, function(x){
                     pa = (x[1] + x[2]/2)/sum(x) 
-                    chisq.test(x, p = c(pa^2, 2*pa*(1-pa), (1-pa)^2))$p.value }
+                    stats::chisq.test(x, p = c(pa^2, 2*pa*(1-pa), (1-pa)^2))$p.value }
                )
   if(freq) counts = t(apply(counts, 1, function(x) x/sum(x)))
   missing = apply(geno, 2, function(x) length(x[is.na(x)]))
@@ -508,7 +509,7 @@ ROC <- function(dn, pre, m = 100, add = FALSE, lwd = 2, lty = 1, col = "black")
   }  
   if(!add) plot(c(0, 1), c(0, 1), xlim=c(0, 1), ylim=c(0, 1), xlab = "False Positive Rate",
                 ylab = "True Positive Rate", type = "l",lty=1, col = "gray")    # draw a diagonal line
-  lines(fpf, tpf, type = "l", lwd = lwd, lty = lty, col = col)
+  graphics::lines(fpf, tpf, type = "l", lwd = lwd, lty = lty, col = col)
 
   # calculate area under curve based on non-parametric statistic (Mann-Whitney U)    
   tp2 <- rep(0, m)                  # number of true positive for each interval of cut-off values
@@ -541,7 +542,7 @@ ROC <- function(dn, pre, m = 100, add = FALSE, lwd = 2, lty = 1, col = "black")
   sq2 <- sum(q2) / (d * (n - d)^2)
   se <- sqrt((auc * (1 - auc) + (d - 1) * (sq1 - auc^2) + ((n - d) - 1) * (sq2 - auc^2)) / (d * (n - d)))
   z <- (auc - 0.5) / se             # z score
-  p <- 2 * pnorm(-abs(z))           # p-value for two-tailed test
+  p <- 2 * stats::pnorm(-abs(z))    # p-value for two-tailed test
   lci <- auc - 1.96 * se            # left boundary of 95% confidence interval
   rci <- auc + 1.96 * se            # right boundary of 95% confidence interval
 #  w <- matrix( c(auc, z, p, lci, rci), 5, 1, dimnames = list(c("Area under curve (AUC)",
@@ -553,7 +554,7 @@ ROC <- function(dn, pre, m = 100, add = FALSE, lwd = 2, lty = 1, col = "black")
 # Average predictive comparison
 geno.effects <- function(object, x.covar = NULL, x.main) 
 {
-  x.fit = model.matrix(object)
+  x.fit = stats::model.matrix(object)
   beta = object$coef
   eta = as.numeric(x.fit%*%beta)  # linear predictor
   geno.mean = mean(exp(eta)/(1+exp(eta))) # population mean
@@ -692,7 +693,7 @@ bdrop <- function(object, vars.keep=0, p=0.001, prior.scale=2.5, prior.df=1, tra
   for(j in 1:100){
     if(!is.null(GetEffects(object, vars.keep=vars.keep, p=p, sig=F))){
       x = GetEffects(object, vars.keep=vars.keep, p=p)
-      object = update(object, data=data.frame(x), prior.scale=prior.scale, prior.df=prior.df)
+      object = stats::update(object, data=data.frame(x), prior.scale=prior.scale, prior.df=prior.df)
       if(trace) {
         cat("times =", j, "\n")
         print(summary(object, dispersion=object$dispersion)$coef, digits=3)
@@ -708,8 +709,8 @@ summary.bglm <- function (object, ...)
 {
     out <- summary(object, dispersion = object$dispersion)
     coef.table <- out$coefficients
-    herit <- coef.table[,1]^2 * apply(model.matrix(object), 2, var)/
-             var(object$linear.pred + object$resid)
+    herit <- coef.table[,1]^2 * apply(stats::model.matrix(object), 2, stats::var)/
+             stats::var(object$linear.pred + object$resid)
     herit <- as.matrix(herit)
     colnames(herit) <- "Heritability"
     OR <- exp(coef.table[,1])
@@ -728,8 +729,8 @@ summary.bpolr <- function (object, ...)
   out <- summary(object)
   tvalue <- out$coefficients[,3]
   df.r <- object$df.residual
-  if(df.r > 0) pvalue <- 2*pt(-abs(tvalue), df.r)
-  else pvalue <- 2*pnorm(-abs(tvalue))
+  if(df.r > 0) pvalue <- 2 * stats::pt(-abs(tvalue), df.r)
+  else pvalue <- 2 * stats::pnorm(-abs(tvalue))
   pvalue <- as.matrix(pvalue)
   colnames(pvalue) <- "Pr(>|t|)"
   out$coefficients <- cbind(out$coefficients, pvalue)

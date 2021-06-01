@@ -27,11 +27,11 @@ qb.data <- function( cross, pheno.col = 1, trait = c("normal","binary","ordinal"
   trait <- match.arg(trait)
 
   if(is.character(pheno.col))
-    pheno.col <- find.pheno(cross, pheno.col)
+    pheno.col <- qtl::find.pheno(cross, pheno.col)
   if(is.character(fixcov))
-    fixcov <- find.pheno(cross, fixcov)
+    fixcov <- qtl::find.pheno(cross, fixcov)
   if(is.character(rancov))
-    rancov <- find.pheno(cross, rancov)
+    rancov <- qtl::find.pheno(cross, rancov)
   
   qb.valid.phenoData(cross,pheno.col,trait,fixcov,rancov,censor)
   
@@ -49,8 +49,7 @@ multiple.trait <- FALSE; multiple.type <- c("Traditional","SUR"); if(multiple.tr
       if(length(yvalue[yvalue[,i]>0,i])!=length(yvalue[,i]) | trait!="normal" ) 
         warning(paste("The boxcox transformation cannot be used for",names(cross$pheno[pheno.col])[i]))
       else {
-         require("MASS")
-             BC = boxcox(yvalue[,i] ~ 1)
+             BC = MASS::boxcox(yvalue[,i] ~ 1)
              lamda[i] = BC$x[ which.max(BC$y) ] 
              if(lamda[i] != 0) yvalue[,i] = (yvalue[,i]^lamda[i] - 1)/lamda[i]
              else
@@ -61,7 +60,7 @@ multiple.trait <- FALSE; multiple.type <- c("Traditional","SUR"); if(multiple.tr
   if(standardize & trait=="normal")
   {
   for(i in 1:length(pheno.col))
-    yvalue[,i] = (yvalue[,i] - mean(yvalue[,i], na.rm=T))/sd(yvalue[,i], na.rm=T)
+    yvalue[,i] = (yvalue[,i] - mean(yvalue[,i], na.rm=T))/stats::sd(yvalue[,i], na.rm=T)
    } 
   ## Change missing to 999.
   yvalue[is.na(yvalue)] = 999
@@ -124,7 +123,7 @@ multiple.trait <- FALSE; multiple.type <- c("Traditional","SUR"); if(multiple.tr
 
   if(trait=="binary"|trait=="ordinal") censor = NULL
   if( !is.null(censor) ) {
-    if ( length(dim(censor))!=2 | dim(censor)[1]!=nind(cross) | dim(censor)[2]!=2 )
+    if ( length(dim(censor))!=2 | dim(censor)[1]!=qtl::nind(cross) | dim(censor)[2]!=2 )
        stop("censor should be n x 2 matrix",call.= FALSE)
   }
 
@@ -146,14 +145,14 @@ qb.valid.phenoData<-function(cross,pheno.col,trait,fixcov,rancov,censor){
      stop("The first input variable is not an object of class cross",call.= FALSE)
     if(any(is.na(as.integer(pheno.col))))
      stop("Phenotype column should be an integer",call.=FALSE)
-    if(length(na.omit(as.integer(fixcov)))<length(fixcov))
+    if(length(stats::na.omit(as.integer(fixcov)))<length(fixcov))
      stop("Fixed covariate column id should be a valid integer",call.=FALSE)
-    if(length(na.omit(as.integer(rancov)))<length(rancov))
+    if(length(stats::na.omit(as.integer(rancov)))<length(rancov))
      stop("Random covariate column id should be a valid integer",call.=FALSE)
     if(length(trait)!= 1 | !(trait %in% c("normal","binary","ordinal")))
      stop("Check the type of trait",call.=FALSE)
     if( !is.null(censor) ) {
-    if (length(dim(censor))!=2 | dim(censor)[1]!=nind(cross) | dim(censor)[2]!=2 )
+    if (length(dim(censor))!=2 | dim(censor)[1]!=qtl::nind(cross) | dim(censor)[2]!=2 )
        stop("censor should be n x 2 matrix",call.= FALSE)
     }
 }

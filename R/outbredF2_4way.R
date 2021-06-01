@@ -36,7 +36,7 @@ qb.outbredF2 <- function(dir="",phefile,genfile,mapfile,filestem="outbredF2") {
 	marker.gen <- scan(file,nlines=1,skip=1,what="character",quiet=TRUE)
 	pop.code <- scan(file,nlines=1,skip=2,what="character",quiet=TRUE)
 	na.strings <- c(scan(file,nlines=1,skip=4,what="character",quiet=TRUE),"-","NA")
-	gen <- read.table(file,skip=5,header=FALSE,colClasses="character",na.strings=na.strings)
+	gen <- utils::read.table(file,skip=5,header=FALSE,colClasses="character",na.strings=na.strings)
 	dat1 <- gen[(gen$V5==pop.code[1] | gen$V5==pop.code[2]),-(2:4)]
 	dat2 <- gen[gen$V5==pop.code[3],-(2:5)]
 	dat3 <- gen[gen$V5==pop.code[4],-(2:5)]
@@ -46,7 +46,7 @@ qb.outbredF2 <- function(dir="",phefile,genfile,mapfile,filestem="outbredF2") {
 	F2inds <- nrow(dat3)
 	print("Recoding...",quote=FALSE)
 	genotype <- .C("outbredF2_4way",as.character(file),as.integer(F0inds),as.integer(F1inds),as.integer(F2inds),PACKAGE="qtlbim")
-	genotype <- read.table("newgenfile.txt",header=FALSE)
+	genotype <- utils::read.table("newgenfile.txt",header=FALSE)
 	print("The recoded genotypes are:",quote=FALSE)
 	cat("AA is ",pop.code[1],"/",pop.code[1],"\n",sep="")
 	cat("AB is ",pop.code[1],"/",pop.code[2],"\n",sep="")
@@ -70,7 +70,7 @@ qb.outbredF2 <- function(dir="",phefile,genfile,mapfile,filestem="outbredF2") {
 	file <- phefile
 	pheno.names <- scan(file,nlines=1,skip=1,what="character",quiet=TRUE)
 	na.strings <- c(scan(file,nlines=1,skip=2,what="character",quiet=TRUE),"-","NA")
-	pheno <- read.table(file,skip=3,header=FALSE,na.strings=na.strings)
+	pheno <- utils::read.table(file,skip=3,header=FALSE,na.strings=na.strings)
 	#order the individuals in the phenotype file
 	p <- order(pheno[,1])
 	#determine which individuals are genotyped but not phenotyped
@@ -79,7 +79,7 @@ qb.outbredF2 <- function(dir="",phefile,genfile,mapfile,filestem="outbredF2") {
 		qqq1 <- sapply(1:length(qqq),function(a) {which(sorted_genotype[o,1]==qqq[a],arr.ind=TRUE)})
 		cleangeno <- cleangeno[-qqq1,]
 	}
-	write.table(cleangeno[,-1],"gen.txt",row.names=FALSE,col.names=FALSE,quote=FALSE,na="0")
+	utils::write.table(cleangeno[,-1],"gen.txt",row.names=FALSE,col.names=FALSE,quote=FALSE,na="0")
 	#determine which individuals are phenotyped but not genotyped
 	rrr <- setdiff(as.character(pheno[p,1]),as.character(sorted_genotype[o,1]))
 	cleanpheno <- pheno[p,]
@@ -88,7 +88,7 @@ qb.outbredF2 <- function(dir="",phefile,genfile,mapfile,filestem="outbredF2") {
 		cleanpheno <- cleanpheno[-rrr1,]
 	}
 	colnames(cleanpheno) <- c("ID",pheno.names)
-	write.table(cleanpheno,"phe.txt",row.names=FALSE,col.names=TRUE,quote=FALSE,na="-")
+	utils::write.table(cleanpheno,"phe.txt",row.names=FALSE,col.names=TRUE,quote=FALSE,na="-")
 
 	#overwritten to include map duplication since the map for a 4-way cross has to be a matrix of 2 x n.markers rather than a vector of n.markers
 	read.cross.karl <- function (dir, genfile, mapfile, phefile) {
@@ -103,8 +103,8 @@ qb.outbredF2 <- function(dir="",phefile,genfile,mapfile,filestem="outbredF2") {
 			mapfile <- file.path(dir, mapfile)
 			phefile <- file.path(dir, phefile)
 		}
-		geno <- as.matrix(read.table(genfile, na.strings = "0"))
-		pheno <- as.matrix(read.table(phefile, na.strings = "-", header = TRUE))
+		geno <- as.matrix(utils::read.table(genfile, na.strings = "0"))
+		pheno <- as.matrix(utils::read.table(phefile, na.strings = "-", header = TRUE))
 		tempmap <- scan(mapfile, what = character(), quiet = TRUE)
 		n.chr <- as.numeric(tempmap[1])
 		n.mar <- 1:n.chr
@@ -191,7 +191,7 @@ qb.outbredF2 <- function(dir="",phefile,genfile,mapfile,filestem="outbredF2") {
 		list(cross, FALSE)
 	}
 
-	cross <- read.cross(format="karl",genfile="gen.txt",phefile="phe.txt",mapfile="map.txt",genotypes=NULL,alleles=c("A","B","C","D"))
+	cross <- qtl::read.cross(format="karl",genfile="gen.txt",phefile="phe.txt",mapfile="map.txt",genotypes=NULL,alleles=c("A","B","C","D"))
 	names(cross$geno) <- chr.name
 	#write.cross does not work for 4way crosses
 	#write.cross(cross,format="csv",filestem=filestem)
