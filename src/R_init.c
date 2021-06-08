@@ -5,7 +5,7 @@
 #include <R_ext/Rdynload.h>
 #include "R_init.h"
 
-void R_init_qtl(DllInfo* info) {
+void R_init_qtlbim(DllInfo* info) {
   R_registerRoutines(info, NULL, NULL, NULL, NULL);
   R_useDynamicSymbols(info, TRUE);
 }

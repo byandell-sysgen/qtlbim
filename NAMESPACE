@@ -18,7 +18,7 @@ importFrom("stats", "dpois", "median", "na.omit", "quantile", "var")
 importFrom("utils", "compareVersion", "stack")
 importFrom("qtl", "calc.genoprob", "clean", "create.map", "drop.markers",
            "effectplot", "find.marker", "find.pheno", "fitqtl", "jittermap",
-           "nchr", "nind", "nmar", "pull.map," "qtlversion", "read.cross",
+           "nchr", "nind", "nmar", "pull.map", "qtlversion", "read.cross",
            "sim.geno")
 ############################################################################
 # Export directives.  These directives export functions.  S3 methods for
