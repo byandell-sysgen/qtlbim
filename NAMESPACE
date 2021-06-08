@@ -9,13 +9,17 @@
 # zzz.r.
 #
 
-useDynLib(qtlbim)
+useDynLib(qtlbim, .registration = TRUE)
 
 ############################################################################
 # Import directives.  These directives import functions.
 importFrom("graphics", "barplot", "lines", "points", "text")
 importFrom("stats", "dpois", "median", "na.omit", "quantile", "var")
 importFrom("utils", "compareVersion", "stack")
+importFrom("qtl", "calc.genoprob", "clean", "create.map", "drop.markers",
+           "effectplot", "find.marker", "find.pheno", "fitqtl", "jittermap",
+           "nchr", "nind", "nmar", "pull.map," "qtlversion", "read.cross",
+           "sim.geno")
 ############################################################################
 # Export directives.  These directives export functions.  S3 methods for
 # classes declared in the package should be declared with the "S3method"
